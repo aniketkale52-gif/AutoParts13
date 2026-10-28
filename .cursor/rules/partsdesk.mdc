@@ -1,0 +1,12 @@
+---
+description: PartsDesk POS project rules (design system, business rules, stack)
+globs:
+alwaysApply: true
+---
+Follow AGENTS.md in the repo root. Before changing UI, read docs/DESIGN_SYSTEM.md. Before changing flows or data, read docs/PRODUCT.md and docs/DATA_MODEL.md.
+
+- Use only the CSS tokens in src/styles.css (colours, Saira / Work Sans / JetBrains Mono, spacing 8/16/28/48/80, radius 8px or pill). New colours need light + both dark blocks.
+- Lime accent only for actions and selected state.
+- Users are often 40–60+: body text 16px or more, touch targets 42px or more, icons always with text labels.
+- Keep the 3 km shop-visibility rule, the quantity privacy and the share-number-on-accept rule.
+- Escape user text with esc(). Keep phone layout working (no horizontal scroll).

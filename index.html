@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PartsDesk POS</title>
+  <meta name="description" content="Point of sale and parts network for auto-parts shops and suppliers.">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Saira:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+<div class="app no-side" id="app">
+  <aside class="side" id="side" aria-label="Main menu"></aside>
+  <div class="side-scrim" id="sideScrim" hidden></div>
+  <div class="main">
+    <header class="mtop">
+      <button class="icon-btn" id="menuBtn" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <span class="logo" id="mLogo"></span><b id="mName"></b>
+    </header>
+    <div class="content" id="content">
+
+  <!-- LOGIN -->
+  <section id="view-login" hidden><div class="page">
+    <div class="login-top"><span class="brand"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><circle cx="12" cy="12" r="3.4"/></svg></i>PartsDesk</span><button class="theme-btn" data-theme-toggle></button></div>
+    <div class="login">
+      <div>
+        <span class="label">Point of sale for auto-parts shops</span>
+        <h1 style="margin-top:12px">Out of a part? <mark>Find who has it.</mark></h1>
+        <p class="lede">Bill at the counter, send pick slips to the store room, keep khata, and check live supplier stock. When both sides are interested, numbers are shared in the app and the deal is settled on a call.</p>
+        <div class="how">
+          <div><h3>Counter</h3><p>Big tap tiles, bulk rates, GST bills and every payment mode.</p></div>
+          <div><h3>Supplier stock</h3><p>Vendors keep stock current. Search a part and see who has it now.</p></div>
+          <div><h3>Shop trade</h3><p>Post what you need. Shops within 3 km of you never see it.</p></div>
+        </div>
+      </div>
+      <div class="accounts">
+        <div><h2>Sign in</h2><p class="muted small" style="margin:4px 0 0">Demo accounts. Each shop sees its own logo and name; vendors get their own app.</p></div>
+        <div><div class="label">Shops</div><ul class="acc-list" id="accShops"></ul></div>
+        <div><div class="label">Vendors</div><ul class="acc-list" id="accVendors"></ul></div>
+      </div>
+    </div>
+  </div></section>
+
+  <!-- COUNTER -->
+  <section id="view-counter" hidden>
+    <div class="pos-grid">
+      <div class="catalog">
+        <div class="pos-top">
+          <h1>New sale</h1>
+          <div class="seg" role="group" aria-label="Vehicle type" id="vehSeg">
+            <button data-veh="all" aria-pressed="true">All</button>
+            <button data-veh="2W" aria-pressed="false">Two-wheeler</button>
+            <button data-veh="4W" aria-pressed="false">Four-wheeler</button>
+          </div>
+        </div>
+        <label class="search" style="flex:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" type="search" placeholder="Search part, vehicle or part number" autocomplete="off" aria-label="Search parts">
+        </label>
+        <div class="chips" id="cats" role="group" aria-label="Category"></div>
+        <div class="tiles" id="grid"></div>
+      </div>
+
+      <aside class="cart" id="cart" aria-label="Current bill">
+        <div class="cust-row">
+          <button class="custbtn" id="pickCust" aria-label="Choose customer"></button>
+          <button class="icon-btn cart-close" id="closeCart" aria-label="Close bill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="cart-bar"><span class="label" id="itemsLabel">Items in bill</span><button class="clear" id="clearCart">Clear</button></div>
+        <div id="slipOn"></div>
+        <div class="cart-scroll">
+          <ul class="lines" id="lines"></ul>
+          <div class="disc" id="cartExtras">
+            <span class="label" style="margin-right:auto">Discount</span>
+            <div class="seg sm" role="group" aria-label="Discount type" id="discSeg">
+              <button data-dtype="pct" aria-pressed="true">%</button>
+              <button data-dtype="amt" aria-pressed="false">₹ flat</button>
+            </div>
+            <input class="input num" id="discVal" type="number" min="0" step="0.5" value="0" aria-label="Discount value">
+          </div>
+        </div>
+        <div class="sum" id="sum"></div>
+        <div class="paygrid-m" id="payM"></div>
+      </aside>
+      <div class="paybar" id="paybar"></div>
+    </div>
+    <div class="cartbar"><div><b id="barTotal">₹0</b><span id="barItems">No items yet</span></div><button class="btn btn-primary" id="openCart">Review bill</button></div>
+    <div class="sheet-scrim" id="sheetScrim" hidden></div>
+  </section>
+
+  <!-- BILLS -->
+  <section id="view-bills" hidden><div class="page">
+    <div class="view-head"><div><h1>Bills</h1><p>Every bill from this counter. Tap a bill to open it.</p></div></div>
+    <div class="stats" id="stats"></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Bill no.</th><th>Date</th><th>Customer</th><th class="r">Items</th><th class="r">Units</th><th>Paid by</th><th class="r">Total</th></tr></thead>
+      <tbody id="billBody"></tbody></table></div>
+  </div></section>
+
+  <!-- CUSTOMERS -->
+  <section id="view-customers" hidden><div class="page">
+    <div class="view-head"><div><h1>Customers</h1><p id="custSub"></p></div><button class="btn btn-primary" data-newcust>Add customer</button></div>
+    <div class="stats" id="custStats"></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Customer</th><th>Type</th><th>Mobile</th><th>Last bill</th><th class="r">Khata due</th><th></th></tr></thead>
+      <tbody id="custBody"></tbody></table></div>
+  </div></section>
+
+  <!-- INVENTORY -->
+  <section id="view-inventory" hidden><div class="page">
+    <div class="view-head"><div><h1>Inventory</h1><p id="invSummary"></p></div><button class="btn btn-primary" id="toggleAdd">Add part</button></div>
+    <form class="addform" id="addForm" hidden novalidate>
+      <h3>Add a part</h3>
+      <div class="formgrid">
+        <div class="field wide"><label for="fName">Part name</label><input class="input" id="fName" placeholder="Rear brake shoe set"></div>
+        <div class="field wide"><label for="fFits">Fits</label><input class="input" id="fFits" placeholder="Honda Shine, SP 125"></div>
+        <div class="field"><label for="fPn">Part number</label><input class="input mono" id="fPn" placeholder="Auto if blank"></div>
+        <div class="field"><label for="fVeh">Vehicle</label><select class="input" id="fVeh"><option value="2W">Two-wheeler</option><option value="4W">Four-wheeler</option><option value="Both">Both</option></select></div>
+        <div class="field"><label for="fCat">Category</label><select class="input" id="fCat"></select></div>
+        <div class="field"><label for="fRack">Rack / bin</label><input class="input mono" id="fRack" placeholder="R2-B4"></div>
+        <div class="field"><label for="fCost">Cost price (₹)</label><input class="input num" id="fCost" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="fPrice">Selling price (₹, before GST)</label><input class="input num" id="fPrice" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="fBulkMin">Bulk from (qty)</label><input class="input num" id="fBulkMin" type="number" min="2" step="1" placeholder="10"></div>
+        <div class="field"><label for="fBulkPrice">Bulk price (₹)</label><input class="input num" id="fBulkPrice" type="number" min="0" step="0.01"></div>
+        <div class="field"><label for="fStock">Opening stock</label><input class="input num" id="fStock" type="number" min="0" step="1"></div>
+        <div class="field"><label for="fReorder">Reorder level</label><input class="input num" id="fReorder" type="number" min="0" step="1" placeholder="5"></div>
+        <div class="field"><label for="fHsn">HSN code</label><input class="input mono" id="fHsn" placeholder="8714"></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Save part</button><button class="btn-link" type="button" id="cancelAdd">Cancel</button><span class="err" id="formErr" role="alert"></span></div>
+    </form>
+    <div class="toolbar">
+      <label class="search" style="max-width:480px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="invQ" type="search" placeholder="Search inventory" autocomplete="off" aria-label="Search inventory"></label>
+      <button class="chip" id="lowOnly" aria-pressed="false">Low or out of stock</button>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Part</th><th>Rack</th><th>Vehicle</th><th class="r">In stock</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Margin</th><th>Status</th><th></th></tr></thead>
+      <tbody id="invBody"></tbody></table></div>
+  </div></section>
+
+  <!-- REPORTS -->
+  <section id="view-reports" hidden><div class="page">
+    <div class="view-head"><div><h1>Reports</h1><p>How the counter is doing. Sample bills are included so the numbers aren't empty.</p></div>
+      <div class="seg" role="group" aria-label="Period" id="rangeSeg"><button data-range="today" aria-pressed="false">Today</button><button data-range="7" aria-pressed="true">Last 7 days</button></div></div>
+    <div class="stats" id="rStats"></div>
+    <div class="rgrid" id="rPanels"></div>
+  </div></section>
+
+  <!-- FIND STOCK -->
+  <section id="view-find" hidden><div class="page">
+    <div class="view-head"><div><h1>Find stock</h1><p>Search a part to see which suppliers and shops have it now. Send interest, and they share their number with you here.</p></div></div>
+    <div class="find-wrap">
+      <label class="search" style="flex:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="fq" type="search" placeholder="Engine oil, Swift oil filter, BP-HI20-F…" autocomplete="off" aria-label="Search parts across the network"></label>
+      <div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg><span id="hideNote"></span></div>
+      <div id="findOut" style="display:flex;flex-direction:column;gap:var(--md)"></div>
+    </div>
+  </div></section>
+
+  <!-- WANTED -->
+  <section id="view-wanted" hidden><div class="page">
+    <div class="view-head"><div><h1>Wanted</h1><p>Parts other shops are looking for. If you have it, offer it. Post your own request when no supplier has stock.</p></div><button class="btn btn-primary" id="toggleWant">Post a request</button></div>
+    <form class="addform" id="wantForm" hidden novalidate>
+      <h3>What do you need?</h3>
+      <div class="formgrid">
+        <div class="field wide"><label for="wPart">Part</label><select class="input" id="wPart"></select></div>
+        <div class="field"><label for="wQty">Quantity</label><input class="input num" id="wQty" type="number" min="1" step="1" value="1"></div>
+        <div class="field"><label for="wOffer">Your price per unit (₹)</label><input class="input num" id="wOffer" type="number" min="0" step="1" placeholder="Optional"></div>
+        <div class="field full"><label for="wNote">Note for shops</label><input class="input" id="wNote" placeholder="Needed by Friday · can pick up from Dadar"></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Post to shops</button><button class="btn-link" type="button" id="cancelWant">Cancel</button><span class="muted small" id="wReach"></span><span class="err" id="wErr" role="alert"></span></div>
+    </form>
+    <div class="deals" id="wantedList"></div>
+    <h2 class="section-h" style="margin-top:var(--lg)">Your requests</h2>
+    <div class="deals" id="wantedMine"></div>
+  </div></section>
+
+  <!-- INTERESTS -->
+  <section id="view-deals" hidden><div class="page">
+    <div class="view-head"><div><h1>Interests</h1><p id="dealsSub"></p></div><div class="seg" role="group" aria-label="Show" id="dealSeg"></div></div>
+    <div class="deals" id="dealList"></div>
+  </div></section>
+
+  <!-- VENDOR STOCK -->
+  <section id="view-vstock" hidden><div class="page">
+    <div class="view-head"><div><h1>My stock</h1><p>Shops across the network see what you list here. Keep quantities current so shops only call when you have it.</p></div><button class="btn btn-primary" id="toggleVAdd">List a part</button></div>
+    <div class="stats" id="vStats"></div>
+    <form class="addform" id="vAddForm" hidden novalidate>
+      <h3>List a part</h3>
+      <div class="formgrid">
+        <div class="field wide"><label for="vPart">Part</label><select class="input" id="vPart"></select></div>
+        <div class="field"><label for="vQty">In stock</label><input class="input num" id="vQty" type="number" min="0" step="1"></div>
+        <div class="field"><label for="vPrice">Trade price (₹)</label><input class="input num" id="vPrice" type="number" min="0" step="1"></div>
+        <div class="field"><label for="vMoq">Minimum order</label><input class="input num" id="vMoq" type="number" min="1" step="1" value="1"></div>
+      </div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">List part</button><button class="btn-link" type="button" id="cancelVAdd">Cancel</button><span class="err" id="vErr" role="alert"></span></div>
+    </form>
+    <div class="toolbar"><label class="search" style="max-width:480px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="vq" type="search" placeholder="Search my stock" autocomplete="off" aria-label="Search my stock"></label></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Part</th><th>Part no.</th><th class="r">Trade price ₹</th><th class="r">Min order</th><th class="r">In stock</th><th>Shops see</th></tr></thead>
+      <tbody id="vBody"></tbody></table></div>
+  </div></section>
+
+  <div class="page" id="resetWrap" hidden style="margin-top:var(--xl)">
+    <div class="confirm" id="resetConfirm" hidden><span>This resets every shop, vendor, bill, customer and interest to the sample data.</span>
+      <button class="btn btn-secondary btn-sm" id="resetYes">Reset</button><button class="btn-link" id="resetNo">Keep my data</button></div>
+    <button class="btn-link small" id="resetAsk">Reset demo data</button>
+  </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden role="dialog" aria-modal="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

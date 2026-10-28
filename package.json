@@ -1,0 +1,18 @@
+{
+  "name": "partsdesk-pos",
+  "private": true,
+  "version": "0.1.0",
+  "description": "White-label point of sale and parts network for auto-parts shops and suppliers.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "5.4.10"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
