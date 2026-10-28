@@ -40,11 +40,16 @@ const P={
  Credit:'<path d="M5 4h11a3 3 0 0 1 3 3v14H8a3 3 0 0 1-3-3z"/><path d="M5 18a3 3 0 0 1 3-3h11M9 8h6"/>',
  Split:'<path d="M12 21v-7l-6-6M12 14l6-6M6 3v5h5M18 3v5h-5"/>',
  slip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h4.5"/>',
+ car:'<path d="M5 17H3.5v-3.5L6 9h9l4 4.5h1.5V17H19"/><path d="M9 17h6M6 13.5h13"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
+ bike:'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h6l2.5-5"/><path d="M3 12h6l2 2h3.5"/><path d="m19 17-3-7h-2.5"/><path d="M16 10h2.5"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
  x:'<path d="M6 6l12 12M18 6 6 18"/>',
  check:'<path d="m5 12 5 5L20 7"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>'
 };
+// Vehicle on a card: a small car and/or bike icon; the words are in title and the card label for screen readers.
+const VEHW={"2W":"Two-wheeler","4W":"Four-wheeler",Both:"Two-wheeler and four-wheeler"};
+const vehIc=v=>`<span class="veh veh-ic" title="${VEHW[v]||""}">${v!=="4W"?ic("bike",1.7):""}${v!=="2W"?ic("car",1.7):""}</span>`;
 const ic=(k,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]||P.Engine}</svg>`;
 
 /* ---------- catalogue: name, fits, pn, veh, cat, hsn, price, tiers, cost ---------- */
@@ -345,8 +350,8 @@ function renderGrid(){
   $("#grid").innerHTML=`<button class="tile add" data-goadd>${ic("plus")}Add part</button>`+(groups.length?groups.map(vs=>{const p=vs[0],st=groupState(vs),qty=vs.reduce((a,v)=>a+(inCart[v.id]||0),0);
     const avail=vs.filter(v=>v.stock>0),prices=(avail.length?avail:vs).map(v=>v.price),lo=Math.min(...prices),multi=vs.length>1,stock=vs.reduce((a,v)=>a+v.stock,0);
     const brands=[...new Set(vs.slice().sort((a,b)=>a.price-b.price).map(v=>v.brand).filter(Boolean))].join(", ");
-    return `<button class="tile${qty?" in":""}${st==="out"?" oos":""}" data-part="${esc(pidOf(p))}" aria-label="${st==="out"?"Out of stock: ":multi?"Choose a brand of ":"Add "}${esc(multi?p.name:full(p))}, ${esc(p.fits)}, ${multi?"from ":""}${money0(lo)}">
-      <span class="tile-art${PHOTOS[pidOf(p)]?" photo":""}">${art(p)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
+    return `<button class="tile${qty?" in":""}${st==="out"?" oos":""}" data-part="${esc(pidOf(p))}" aria-label="${st==="out"?"Out of stock: ":multi?"Choose a brand of ":"Add "}${esc(multi?p.name:full(p))}, ${esc(p.fits)}, ${VEHW[p.veh]||""}, ${multi?"from ":""}${money0(lo)}">
+      <span class="tile-art${PHOTOS[pidOf(p)]?" photo":""}">${art(p)}${vehIc(p.veh)}${qty?`<span class="badge">${qty}</span>`:""}</span>
       <span class="tile-body"><span class="tile-name">${esc(p.name)}</span><span class="tile-fits">${esc(p.fits)}</span>
       <span class="tile-brands">${multi?`${vs.length} brands · `:""}${esc(brands||"No brand")}</span>
       <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":stock+" left"}</span><span class="price-stack"><small${multi&&Math.max(...prices)>lo?"":" class=\"blank\" aria-hidden=\"true\""}>from</small><span class="price">${money0(lo)}</span></span></span></span></button>`}).join("")
