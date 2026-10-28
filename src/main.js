@@ -349,7 +349,7 @@ function renderGrid(){
       <span class="tile-art${PHOTOS[pidOf(p)]?" photo":""}">${art(p)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
       <span class="tile-body"><span class="tile-name">${esc(p.name)}</span><span class="tile-fits">${esc(p.fits)}</span>
       <span class="tile-brands">${multi?`${vs.length} brands · `:""}${esc(brands||"No brand")}</span>
-      <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":stock+" left"}</span><span class="price">${multi&&Math.max(...prices)>lo?`<small>from </small>`:""}${money0(lo)}</span></span></span></button>`}).join("")
+      <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":stock+" left"}</span><span class="price-stack"><small${multi&&Math.max(...prices)>lo?"":" class=\"blank\" aria-hidden=\"true\""}>from</small><span class="price">${money0(lo)}</span></span></span></span></button>`}).join("")
     :`<div class="empty" style="grid-column:2/-1">No parts match${f.q?` “${esc(f.q)}”`:""}${f.brand?` in ${esc(f.brand)}`:""}. <button class="btn-link" data-findq="${esc(f.q)}">Search suppliers and shops</button></div>`);
 }
 // Tapping a card: one brand goes straight on the bill; several brands open the brand picker.

@@ -151,11 +151,14 @@ textarea.input{height:auto;min-height:84px;padding:12px 14px;resize:vertical}
 .thumb{position:relative;overflow:hidden}
 .tile.oos .tile-art img{filter:grayscale(1)}
 .tile-brands{font-size:13.5px;font-weight:500;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
-.price small{font-family:var(--body);font-size:13px;font-weight:500;color:var(--faint)}
+/* Card price: "from" sits on its own line above the price, right-aligned with it. Every card keeps the line so prices line up across the grid. */
+.price-stack{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.price-stack small{font-size:13px;font-weight:500;color:var(--faint)}
+.price-stack small.blank{visibility:hidden}
 .pos-find{display:flex;gap:12px;flex-wrap:wrap}
 .pos-find .search{min-width:220px}
 .brandf{position:relative;min-width:160px;flex:0 1 220px}
-.brandf select{height:52px;border-radius:var(--r-full);padding:0 48px 0 20px;appearance:none;-webkit-appearance:none;cursor:pointer}
+.brandf select{height:52px;border-radius:var(--r-full);padding:0 48px 0 20px;-webkit-appearance:none;appearance:none;cursor:pointer}
 .brandf select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 65%,transparent)}
 .brandf svg{position:absolute;right:20px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:var(--muted);pointer-events:none}
 .brandchip{font-size:13px;font-weight:600;border-radius:var(--r-full);padding:2px 10px;background:var(--raised);border:1px solid var(--line-strong);white-space:nowrap}
