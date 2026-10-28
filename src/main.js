@@ -114,6 +114,16 @@ const CATALOG=[
  ["ck-apache","Motorcycle chain kit","TVS Apache RTR 160","CS-TA160-03","2W","Transmission","8714",1450,[[5,1360]],1120],
  ["ea-m800","Engine assembly, reconditioned","Maruti 800 MPFI","EA-M800-R","4W","Engine","8407",46500,[],41200]
 ].map(r=>({id:r[0],name:r[1],fits:r[2],pn:r[3],veh:r[4],cat:r[5],hsn:r[6],price:r[7],tiers:r[8].map(t=>({min:t[0],price:t[1]})),cost:r[9]}));
+// Catalogue part id -> photo in public/parts (Wikimedia Commons, see public/parts/CREDITS.txt). Parts not listed show their category icon.
+const PHOTOS={"eo-5w30":"engine-oil","eo-10w30":"engine-oil","eo-15w40":"engine-oil","of-swift":"oil-filter","of-hy":"oil-filter","of-re":"oil-filter",
+ "af-nexon":"cabin-filter","af-activa":"air-filter-2w","cf-creta":"cabin-filter","acf-swift":"cabin-filter","ff-mh":"fuel-filter","sp-2w":"spark-plug","sp-4w":"spark-plug",
+ "bp-i20":"brake-pads","bp-swift":"brake-pads","mbp-pulsar":"brake-pads","mbp-activa":"brake-pads","bs-splendor":"brake-shoes","bs-alto":"brake-shoes","bd-swift":"brake-disc",
+ "bdr-bolero":"brake-drum","bmc-wagonr":"master-cylinder","cp-alto":"clutch-plate","cp-pulsar":"clutch-plate","ck-swift":"clutch-kit","cc-splendor":"clutch-cable",
+ "tb-wagonr":"timing-belt","bt-35":"battery-car","bt-5":"battery-2w","alt-bolero":"alternator","hb-h4":"h4-bulb","ha-swift":"headlight","tl-creta":"tail-light",
+ "ib-21w":"indicator-bulb","wb-24":"wiper-blade","wm-swift":"wiper-motor","cl-1l":"coolant","th-hy":"thermostat","sa-swift":"shock-absorber","sa-shine":"shock-2w",
+ "fs-creta":"strut","tre-swift":"tie-rod-end","wbr-swift":"wheel-bearing","whub-xuv":"wheel-hub","ty-185":"tyre-car","ty-9090":"tyre-2w","fp-hy":"fuel-pump",
+ "fi-mh":"fuel-injector","ic-swift":"ignition-coil","acc-creta":"ac-compressor","cvj-swift":"cv-joint","cvb-kit":"cv-boot","ck-apache":"chain-kit","ea-m800":"engine"};
+const art=p=>PHOTOS[p.id]?`<img src="${import.meta.env.BASE_URL}parts/${PHOTOS[p.id]}.jpg" alt="" loading="lazy" decoding="async">`:ic(p.cat,1.5);
 const RACKS={Engine:"R5",Filters:"R3",Brakes:"R1",Clutch:"R2",Electrical:"R4",Lighting:"R9",Cooling:"R10",Suspension:"R7",Steering:"R7",Wheels:"R11",Transmission:"R2",Fuel:"R5",AC:"R10",Lubricants:"R6",Cables:"R8",Body:"R8"};
 // Sai Auto Spares: [stock, reorder level]. Parts not listed get a typical level from their price.
 const S1_FIXED={"eo-5w30":[0,6],"cc-splendor":[0,10],"mbp-activa":[4,8],"wb-24":[3,6],"ea-m800":[1,1],"acc-creta":[1,1],"ha-swift":[1,2],"ty-185":[3,4],"rad-alto":[0,1],"of-swift":[85,20],"sp-4w":[32,8],"af-nexon":[22,6]};
@@ -291,7 +301,7 @@ function renderGrid(){
   const inCart=Object.fromEntries(cart.map(l=>[l.id,l.qty]));
   $("#grid").innerHTML=`<button class="tile add" data-goadd>${ic("plus")}Add part</button>`+(list.length?list.map(p=>{const st=stockState(p),qty=inCart[p.id];
     return `<button class="tile${qty?" in":""}${st==="out"?" oos":""}" ${st==="out"?`data-oos="${p.id}"`:`data-add="${p.id}"`} aria-label="${st==="out"?"Out of stock: ":"Add "}${esc(p.name)}, ${esc(p.fits)}, ${money0(p.price)}">
-      <span class="tile-art">${ic(p.cat,1.5)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
+      <span class="tile-art${PHOTOS[p.id]?" photo":""}">${art(p)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
       <span class="tile-body"><span class="tile-name">${esc(p.name)}</span><span class="tile-fits">${esc(p.fits)}</span>
       <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":p.stock+" left"}</span><span class="price">${money0(p.price)}</span></span></span></button>`}).join("")
     :`<div class="empty" style="grid-column:2/-1">No parts match “${esc(f.q)}”. <button class="btn-link" data-findq="${esc(f.q)}">Search suppliers and shops</button></div>`);
@@ -470,7 +480,7 @@ function renderInventory(){
   const low=inventory.filter(p=>stockState(p)==="low").length,out=inventory.filter(p=>stockState(p)==="out").length;
   $("#invSummary").textContent=`${inventory.length} parts · stock worth ${money0(Math.round(inventory.reduce((a,p)=>a+(p.cost||0)*p.stock,0)))} at cost · ${low} low, ${out} out of stock`;
   $("#invBody").innerHTML=list.length?list.map(p=>{const st=stockState(p),m=p.price>0&&p.cost?(p.price-p.cost)/p.price*100:null,mc=m===null?"":m>=20?"m-ok":m>=12?"m-low":"m-bad";
-    return `<tr class="${st!=="ok"?"lowrow":""}"><td><div class="pcell"><span class="thumb">${ic(p.cat,1.5)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div></td>
+    return `<tr class="${st!=="ok"?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div></td>
     <td><span class="mono">${esc(p.rack||"—")}</span></td><td><span class="veh">${p.veh==="Both"?"2W · 4W":p.veh}</span></td>
     <td class="r"><input class="input cell-in" type="number" min="0" id="stock-${p.id}" data-stock="${p.id}" value="${p.stock}" aria-label="Stock of ${esc(p.name)}"></td>
     <td class="r num">${p.cost?money0(p.cost):"—"}</td><td class="r num">${money0(p.price)}${p.tiers.length?`<div class="small" style="color:var(--steel)">${p.tiers[0].min}+ @ ${money0(p.tiers[0].price)}</div>`:""}</td>
@@ -524,7 +534,7 @@ function partSources(p){
   const sRows=shops.length?shops.map(({s,it})=>`<li class="src-row"><div class="src-main"><div class="src-title"><span class="src-name">${esc(s.name)}</span><span class="tag">Shop</span></div><div class="src-meta">${esc(s.area)} · ${kmTxt(me,s)}</div></div>
       <div class="src-side"><span class="stock s-${stockState(it)==="low"?"low":"ok"}">${stockState(it)==="low"?"Limited stock":"Has stock"}</span>${statusOrCta({t:"shop",id:s.id},p.id)}</div></li>`).join(""):`<li class="src-row faint">No shop more than ${HIDE_KM} km away has it in stock.</li>`;
   const any=vend.some(x=>x.it.qty>0)||shops.length;
-  return `<section class="fpart"><div class="fpart-head"><div class="pcell"><span class="thumb">${ic(p.cat,1.5)}</span><div><h2>${esc(p.name)}</h2><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div>${myStatus}</div>
+  return `<section class="fpart"><div class="fpart-head"><div class="pcell"><span class="thumb">${art(p)}</span><div><h2>${esc(p.name)}</h2><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div>${myStatus}</div>
     <div class="group-label"><span class="label">Suppliers</span><span class="faint small">Exact stock, kept current by the supplier</span></div><ul class="src">${vRows}</ul>
     <div class="group-label"><span class="label">Shops more than ${HIDE_KM} km away</span><span class="faint small">Shops never see each other's quantities</span></div><ul class="src">${sRows}</ul>
     <div class="fpart-foot"><span>${any?"Need more than they have?":"Nobody has it in stock right now."}</span><button class="btn ${any?"btn-secondary":"btn-primary"} btn-sm" data-want="${p.id}">Post to Wanted</button></div></section>`;
@@ -536,7 +546,7 @@ function renderFind(){
   const parts=find.pid?[cat(find.pid)]:q?CATALOG.filter(p=>(p.name+" "+p.fits+" "+p.pn+" "+p.cat).toLowerCase().includes(q)).slice(0,6):null;
   if(!parts){const low=inventory.filter(p=>stockState(p)!=="ok"&&cat(p.id)).sort((a,b)=>a.stock-b.stock);
     out.innerHTML=`<div><h2 class="section-h">Running low at your shop</h2>${low.length?`<ul class="lowlist">${low.map(p=>{const n=net.vendors.filter(v=>(vItem(v,p.id)||{}).qty>0).length;
-      return `<li><div class="pcell"><span class="thumb">${ic(p.cat,1.5)}</span><div><b>${esc(p.name)}</b><span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out of stock"}</span> · ${n?n+" supplier"+(n>1?"s have":" has")+" it":"no supplier has it"}</span></div></div>
+      return `<li><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out of stock"}</span> · ${n?n+" supplier"+(n>1?"s have":" has")+" it":"no supplier has it"}</span></div></div>
       <button class="btn btn-secondary btn-sm" data-find="${p.id}">Find stock</button></li>`}).join("")}</ul>`:`<div class="empty">Everything is above its reorder level.</div>`}</div>`;return}
   out.innerHTML=(find.pid?`<div><button class="btn-link" id="clearFind">← Back to all parts</button></div>`:"")+(parts.length?parts.map(partSources).join(""):`<div class="empty">No part in the network matches “${esc(find.q)}”. Try the vehicle model or part number.</div>`);
 }
@@ -590,7 +600,7 @@ function renderVStock(){
     <div class="stat"><span class="label">Out of stock</span><b>${out}</b></div><div class="stat"><span class="label">Shops that can see you</span><b>${net.shops.length}</b></div>`;
   $("#vPart").innerHTML=CATALOG.filter(p=>!vItem(me,p.id)).map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("")||`<option value="">All catalogue parts are listed</option>`;
   const q=vq.trim().toLowerCase(),rows=me.stock.map(it=>({it,p:cat(it.pid)})).filter(({p})=>!q||(p.name+" "+p.fits+" "+p.pn).toLowerCase().includes(q));
-  $("#vBody").innerHTML=rows.length?rows.map(({it,p})=>`<tr class="${it.qty<=0?"lowrow":""}"><td><div class="pcell"><span class="thumb">${ic(p.cat,1.5)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)}</span></div></div></td><td class="mono">${esc(p.pn)}</td>
+  $("#vBody").innerHTML=rows.length?rows.map(({it,p})=>`<tr class="${it.qty<=0?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)}</span></div></div></td><td class="mono">${esc(p.pn)}</td>
     <td class="r"><input class="input cell-in" type="number" min="0" id="vp-${p.id}" data-vprice="${p.id}" value="${it.price}" aria-label="Trade price of ${esc(p.name)}"></td>
     <td class="r"><input class="input cell-in" type="number" min="1" id="vm-${p.id}" data-vmoq="${p.id}" value="${it.moq}" aria-label="Minimum order for ${esc(p.name)}"></td>
     <td class="r"><input class="input cell-in" type="number" min="0" id="vq-${p.id}" data-vqty="${p.id}" value="${it.qty}" aria-label="Stock of ${esc(p.name)}"></td>
