@@ -57,10 +57,13 @@
             <button data-veh="4W" aria-pressed="false">Four-wheeler</button>
           </div>
         </div>
-        <label class="search" style="flex:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="q" type="search" placeholder="Search part, vehicle or part number" autocomplete="off" aria-label="Search parts">
-        </label>
+        <div class="pos-find">
+          <label class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search part, brand, vehicle or part number" autocomplete="off" aria-label="Search parts">
+          </label>
+          <label class="brandf"><select class="input" id="brandF" aria-label="Brand"></select><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></label>
+        </div>
         <div class="chips" id="cats" role="group" aria-label="Category"></div>
         <div class="tiles" id="grid"></div>
       </div>
@@ -118,6 +121,7 @@
       <div class="formgrid">
         <div class="field wide"><label for="fName">Part name</label><input class="input" id="fName" placeholder="Rear brake shoe set"></div>
         <div class="field wide"><label for="fFits">Fits</label><input class="input" id="fFits" placeholder="Honda Shine, SP 125"></div>
+        <div class="field wide"><label for="fBrand">Brand</label><select class="input" id="fBrand" data-brandsel></select><input class="input" id="fBrandNew" hidden placeholder="Type the new brand's name" aria-label="New brand name"></div>
         <div class="field"><label for="fPn">Part number</label><input class="input mono" id="fPn" placeholder="Auto if blank"></div>
         <div class="field"><label for="fVeh">Vehicle</label><select class="input" id="fVeh"><option value="2W">Two-wheeler</option><option value="4W">Four-wheeler</option><option value="Both">Both</option></select></div>
         <div class="field"><label for="fCat">Category</label><select class="input" id="fCat"></select></div>
@@ -168,6 +172,7 @@
       <h3>What do you need?</h3>
       <div class="formgrid">
         <div class="field wide"><label for="wPart">Part</label><select class="input" id="wPart"></select></div>
+        <div class="field wide"><label for="wBrand">Brand</label><select class="input" id="wBrand"></select></div>
         <div class="field"><label for="wQty">Quantity</label><input class="input num" id="wQty" type="number" min="1" step="1" value="1"></div>
         <div class="field"><label for="wOffer">Your price per unit (₹)</label><input class="input num" id="wOffer" type="number" min="0" step="1" placeholder="Optional"></div>
         <div class="field full"><label for="wNote">Note for shops</label><input class="input" id="wNote" placeholder="Needed by Friday · can pick up from Dadar"></div>
@@ -193,6 +198,7 @@
       <h3>List a part</h3>
       <div class="formgrid">
         <div class="field wide"><label for="vPart">Part</label><select class="input" id="vPart"></select></div>
+        <div class="field wide"><label for="vBrand">Brand</label><select class="input" id="vBrand" data-brandsel></select><input class="input" id="vBrandNew" hidden placeholder="Type the new brand's name" aria-label="New brand name"></div>
         <div class="field"><label for="vQty">In stock</label><input class="input num" id="vQty" type="number" min="0" step="1"></div>
         <div class="field"><label for="vPrice">Trade price (₹)</label><input class="input num" id="vPrice" type="number" min="0" step="1"></div>
         <div class="field"><label for="vMoq">Minimum order</label><input class="input num" id="vMoq" type="number" min="1" step="1" value="1"></div>
@@ -202,7 +208,7 @@
     <div class="toolbar"><label class="search" style="max-width:480px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="vq" type="search" placeholder="Search my stock" autocomplete="off" aria-label="Search my stock"></label></div>
     <div class="tablewrap"><table>
-      <thead><tr><th>Part</th><th>Part no.</th><th class="r">Trade price ₹</th><th class="r">Min order</th><th class="r">In stock</th><th>Shops see</th></tr></thead>
+      <thead><tr><th>Part and brand</th><th>Part no.</th><th class="r">Trade price ₹</th><th class="r">Min order</th><th class="r">In stock</th><th>Shops see</th></tr></thead>
       <tbody id="vBody"></tbody></table></div>
   </div></section>
 

@@ -123,7 +123,22 @@ const PHOTOS={"eo-5w30":"engine-oil","eo-10w30":"engine-oil","eo-15w40":"engine-
  "ib-21w":"indicator-bulb","wb-24":"wiper-blade","wm-swift":"wiper-motor","cl-1l":"coolant","th-hy":"thermostat","sa-swift":"shock-absorber","sa-shine":"shock-2w",
  "fs-creta":"strut","tre-swift":"tie-rod-end","wbr-swift":"wheel-bearing","whub-xuv":"wheel-hub","ty-185":"tyre-car","ty-9090":"tyre-2w","fp-hy":"fuel-pump",
  "fi-mh":"fuel-injector","ic-swift":"ignition-coil","acc-creta":"ac-compressor","cvj-swift":"cv-joint","cvb-kit":"cv-boot","ck-apache":"chain-kit","ea-m800":"engine"};
-const art=p=>PHOTOS[p.id]?`<img src="${import.meta.env.BASE_URL}parts/${PHOTOS[p.id]}.jpg" alt="" loading="lazy" decoding="async">`:ic(p.cat,1.5);
+const art=p=>PHOTOS[pidOf(p)]?`<img src="${import.meta.env.BASE_URL}parts/${PHOTOS[pidOf(p)]}.jpg" alt="" loading="lazy" decoding="async">`:ic(p.cat,1.5);
+// Brands each catalogue part is sold under in the demo, as [brand, price factor vs. the catalogue price]. Shops stock a part once per brand.
+const BSETS={
+ oil:[["Servo",.88],["Gulf",.95],["Castrol",1],["Shell",1.06]],fluid:[["Bosch",1],["Castrol",1.08]],coolant:[["Servo",.92],["Prestone",1]],
+ filter:[["Purolator",.9],["Bosch",1],["Mahle",1.1]],plug:[["Bosch",.95],["NGK",1]],battery:[["Exide",.94],["Amaron",1]],
+ brake:[["TVS Girling",.9],["Rane",.96],["Bosch",1]],clutch:[["Valeo",.94],["LuK",1]],cable:[["Uno Minda",1]],belt:[["Contitech",.94],["Gates",1]],
+ elec:[["Lucas TVS",.92],["Bosch",1]],bulb:[["Osram",.9],["Philips",1]],lamp:[["Lumax",.95],["Uno Minda",1]],wiper:[["Valeo",.95],["Bosch",1]],
+ radiator:[["Subros",.93],["Denso",1]],thermo:[["Wahler",1]],pump:[["GMB",.92],["Aisin",1]],hose:[["Gates",1]],susp:[["Gabriel",.9],["Monroe",1]],
+ steer:[["Rane",.92],["Moog",1]],bearing:[["NBC",.88],["SKF",1]],hub:[["SKF",1]],tyre4:[["Apollo",.94],["CEAT",.97],["MRF",1]],tyre2:[["TVS Eurogrip",.93],["MRF",1]],
+ fuel:[["Delphi",.94],["Bosch",1]],ac:[["Sanden",.93],["Denso",1]],cv:[["GKN",1]],chain:[["Rolon",.92],["Diamond",1]],mount:[["Rane",1]],engine:[["Shop rebuild",1]]};
+const BSET_OF={"eo-":"oil","of-":"filter","af-":"filter","cf-":"filter","ff-":"filter","acf-":"filter","sp-":"plug","bp-":"brake","mbp-":"brake","bs-":"brake","bd-":"brake","bdr-":"brake","bmc-":"brake",
+ "bf-":"fluid","cp-":"clutch","ck-swift":"clutch","cc-":"cable","db-":"belt","tb-":"belt","bt-":"battery","alt-":"elec","sm-":"elec","ic-":"elec","wm-":"elec","hb-":"bulb","ib-":"bulb",
+ "ha-":"lamp","tl-":"lamp","wb-":"wiper","rad-":"radiator","cl-":"coolant","th-":"thermo","wp-":"pump","rh-":"hose","sa-":"susp","fs-":"susp","bj-":"steer","tre-":"steer","cab-":"steer",
+ "wbr-":"bearing","whub-":"hub","ty-185":"tyre4","ty-9090":"tyre2","fp-":"fuel","fi-":"fuel","em-":"mount","acc-":"ac","cvj-":"cv","cvb-":"cv","ck-apache":"chain","ea-":"engine"};
+const bset=pid=>BSETS[BSET_OF[Object.keys(BSET_OF).filter(k=>pid.startsWith(k)).sort((a,b)=>b.length-a.length)[0]]]||[["Bosch",1]];
+const BRANDS0=[...new Set(Object.values(BSETS).flat().map(b=>b[0]))].sort((a,b)=>a.localeCompare(b));
 const RACKS={Engine:"R5",Filters:"R3",Brakes:"R1",Clutch:"R2",Electrical:"R4",Lighting:"R9",Cooling:"R10",Suspension:"R7",Steering:"R7",Wheels:"R11",Transmission:"R2",Fuel:"R5",AC:"R10",Lubricants:"R6",Cables:"R8",Body:"R8"};
 // Sai Auto Spares: [stock, reorder level]. Parts not listed get a typical level from their price.
 const S1_FIXED={"eo-5w30":[0,6],"cc-splendor":[0,10],"mbp-activa":[4,8],"wb-24":[3,6],"ea-m800":[1,1],"acc-creta":[1,1],"ha-swift":[1,2],"ty-185":[3,4],"rad-alto":[0,1],"of-swift":[85,20],"sp-4w":[32,8],"af-nexon":[22,6]};
@@ -144,6 +159,8 @@ const VENDORS0=[
  {id:"v4",name:"Navi Mumbai Auto Electricals",kind:"Batteries · Electricals · Lighting",area:"Turbhe MIDC",phone:"+91 90000 00204",lat:19.0760,lng:73.0170,stock:{"bt-5":[60,1450,5],"bt-35":[22,4520,2],"sp-4w":[0,690,8],"sp-2w":[1200,90,50],"hb-h4":[400,175,20],"alt-bolero":[6,8650,1],"sm-swift":[9,5600,1],"ic-swift":[35,1520,4],"wm-swift":[7,2800,1],"ha-swift":[4,4900,1],"tl-creta":[0,4100,1]}},
  {id:"v5",name:"Deccan Cooling, AC & Tyres",kind:"Cooling · AC · Tyres · Suspension",area:"Vasai East",phone:"+91 90000 00205",lat:19.3919,lng:72.8397,stock:{"rad-alto":[14,3350,2],"th-hy":[40,690,5],"wp-swift":[20,1980,2],"rh-bolero":[50,450,5],"acc-creta":[3,16900,1],"ty-185":[48,4600,4],"ty-9090":[80,1420,4],"sa-swift":[16,2800,2],"fs-creta":[6,5300,1],"wbr-swift":[30,1090,4],"whub-xuv":[5,4750,1],"fp-hy":[6,4000,1],"fi-mh":[0,7900,2]}}
 ];
+// Extra brands some suppliers carry for a part they already list: [pid, brand, qty, price, moq].
+const VENDOR_EXTRA={v1:[["eo-5w30","Servo",90,1690,6],["eo-10w30","Castrol",200,355,12]],v4:[["bt-35","Exide",30,4250,2],["sp-2w","NGK",600,96,50]]};
 const CTYPES=["Retail","Mechanic / garage","Fleet / business"];
 const WALKIN={id:"walkin",name:"Walk-in customer",type:"Retail",phone:"",gstin:"",due:0};
 
@@ -155,6 +172,15 @@ const money=n=>"₹"+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,m
 const money0=n=>"₹"+Number(Math.round(n*100)/100).toLocaleString("en-IN",{maximumFractionDigits:2});
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cat=id=>CATALOG.find(p=>p.id===id);
+// Inventory and supplier rows are one per part per brand. pid is the catalogue part; id is unique to the brand.
+const pidOf=p=>p.pid||p.id;
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"");
+const vid=(pid,brand)=>pid+"--"+slug(brand);
+const full=p=>p.brand?p.brand+" "+p.name:p.name;
+const nice=n=>n<100?Math.round(n):n<1000?Math.round(n/5)*5:Math.round(n/10)*10;
+function variant(p,brand,f){const price=nice(p.price*f);
+  return {...clone(p),pid:p.id,id:vid(p.id,brand),brand,pn:p.pn+"-"+slug(brand).slice(0,3).toUpperCase(),price,cost:nice((p.cost||0)*f),tiers:p.tiers.map(t=>({min:t.min,price:nice(t.price*f)})).filter(t=>t.price<price)}}
+const brandsOf=list=>[...new Set(list.map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
 const initials=n=>n.replace(/[^A-Za-z ]/g,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function read(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
@@ -177,19 +203,21 @@ const savedTheme=read("pd.theme");if(savedTheme)document.documentElement.dataset
 /* ---------- state ---------- */
 let net,session,me,inventory=[],bills=[];
 let cart=[],cartCust="walkin",discount={type:"pct",value:0},slipSent=null;
-const f={q:"",veh:"all",cat:"All"},inv={q:"",low:false},find={q:"",pid:null};
+const f={q:"",veh:"all",cat:"All",brand:""},inv={q:"",low:false},find={q:"",pid:null};
 let dealTab="received",vq="",range="7",current="login";
 const acct=ref=>ref.t==="shop"?net.shops.find(s=>s.id===ref.id):net.vendors.find(v=>v.id===ref.id);
 const isMe=ref=>!!session&&ref.t===session.t&&ref.id===session.id;
 const shopsVisibleTo=s=>net.shops.filter(o=>o.id!==s.id&&km(s,o)>HIDE_KM);
 const canSee=(a,b)=>a.id!==b.id&&km(a,b)>HIDE_KM;
-const vItem=(v,pid)=>v.stock.find(x=>x.pid===pid);
-const myInterest=(toRef,pid)=>net.interests.find(i=>isMe(i.from)&&i.to.t===toRef.t&&i.to.id===toRef.id&&i.pid===pid&&i.kind==="interest"&&i.status!=="declined");
+const vItem=(v,id)=>v.stock.find(x=>x.id===id);
+const vItems=(v,pid)=>v.stock.filter(x=>x.pid===pid);
+const variantsOf=(list,pid)=>list.filter(p=>pidOf(p)===pid);
+const myInterest=(toRef,pid,brand)=>net.interests.find(i=>isMe(i.from)&&i.to.t===toRef.t&&i.to.id===toRef.id&&i.pid===pid&&(i.brand||"")===(brand||"")&&i.kind==="interest"&&i.status!=="declined");
 const getCust=id=>id==="walkin"?WALKIN:(me.customers||[]).find(c=>c.id===id)||WALKIN;
 
 function compute(lines,disc,invList=inventory){
   const items=lines.map(l=>{const p=invList.find(x=>x.id===l.id);const rate=unitRate(p,l.qty);
-    return {id:p.id,name:p.name,pn:p.pn,hsn:p.hsn,cat:p.cat,qty:l.qty,list:p.price,cost:p.cost||0,rate,amount:r2(rate*l.qty)}});
+    return {id:p.id,pid:pidOf(p),brand:p.brand||"",name:full(p),pn:p.pn,hsn:p.hsn,cat:p.cat,qty:l.qty,list:p.price,cost:p.cost||0,rate,amount:r2(rate*l.qty)}});
   const subtotal=r2(items.reduce((a,i)=>a+i.amount,0));
   const bulkSave=r2(items.reduce((a,i)=>a+i.list*i.qty,0)-subtotal);
   let d=disc.type==="pct"?subtotal*Math.min(Math.max(disc.value,0),100)/100:Math.min(Math.max(disc.value,0),subtotal);
@@ -208,9 +236,13 @@ function words(n){if(n===0)return "Zero";const p=[];const cr=Math.floor(n/1e7);n
 function seedNet(){
   const now=Date.now(),at=h=>new Date(now-h*3600e3).toISOString();
   let rack=0;
-  const shops=SHOPS0.map(s=>{const o=clone(s);
-    const mk=(p,stock,reorder)=>({...clone(p),stock,reorder,rack:RACKS[p.cat]+"-B"+(1+(rack++%6))});
-    o.inventory=s.id==="s1"?CATALOG.map((p,i)=>{const [st,ro]=s1Stock(p,i);return mk(p,st,ro)}):CATALOG.filter(p=>p.id in s.stock).map(p=>mk(p,s.stock[p.id],Math.max(2,Math.round(s.stock[p.id]*.2))));
+  const shops=SHOPS0.map((s,si)=>{const o=clone(s);
+    const mk=(p,[brand,f],stock,reorder,r)=>({...variant(p,brand,f),stock,reorder,rack:r});
+    // Sai Auto Spares stocks most brands of each part (cheapest brand gets the most stock); other shops stock one brand.
+    o.inventory=s.id==="s1"?CATALOG.flatMap((p,i)=>{const [st,ro]=s1Stock(p,i),set=bset(p.id),r=RACKS[p.cat]+"-B"+(1+(rack++%6));
+        const use=set.length>=3?set.filter((b,j)=>j!==i%set.length):set;
+        return use.map((b,j)=>mk(p,b,j?Math.round(st*(j===1?.6:.4)):st,j?Math.max(1,Math.round(ro/2)):ro,r))})
+      :CATALOG.filter(p=>p.id in s.stock).map(p=>{const set=bset(p.id);return mk(p,set[si%set.length],s.stock[p.id],Math.max(2,Math.round(s.stock[p.id]*.2)),RACKS[p.cat]+"-B"+(1+(rack++%6)))});
     delete o.stock;o.bills=[];o.customers=[];o.slipSeq=0;return o});
   const s1=shops[0];
   s1.customers=[
@@ -228,32 +260,37 @@ function seedNet(){
       const d=new Date(now-day*864e5);d.setHours(10+Math.floor(rnd()*9),Math.floor(rnd()*60),0,0);if(d>new Date(now))d.setTime(now-(k+1)*40*6e4);
       const cid=custPick[Math.floor(rnd()*custPick.length)];const c=cid==="walkin"?WALKIN:s1.customers.find(x=>x.id===cid);
       const lines=[];const nl=1+Math.floor(rnd()*3);
-      for(let j=0;j<nl;j++){const pool=CATALOG.filter(x=>x.price<7000&&x.id!=="eo-5w30"),p=pool[Math.floor(rnd()*pool.length)];if(lines.find(l=>l.id===p.id))continue;const bulk=c.type!=="Retail"&&rnd()>.5;lines.push({id:p.id,qty:bulk?10+Math.floor(rnd()*15):1+Math.floor(rnd()*3)})}
+      for(let j=0;j<nl;j++){const pool=s1.inventory.filter(x=>x.price<7000&&x.pid!=="eo-5w30"),p=pool[Math.floor(rnd()*pool.length)];if(lines.find(l=>l.id===p.id))continue;const bulk=c.type!=="Retail"&&rnd()>.5;lines.push({id:p.id,qty:bulk?10+Math.floor(rnd()*15):1+Math.floor(rnd()*3)})}
       let mode=modes[Math.floor(rnd()*modes.length)];if(mode==="Credit"&&cid==="walkin")mode="Cash";
       const disc=c.type==="Fleet / business"?{type:"pct",value:3}:{type:"pct",value:0};
       const cc=compute(lines,disc,s1.inventory);n++;
       s1.bills.push({no:s1.prefix+"/"+fy(d)+"/"+String(n).padStart(4,"0"),date:d.toISOString(),customer:{id:c.id,name:c.name,type:c.type,phone:c.phone,gstin:c.gstin},payment:mode,payParts:[{mode,amount:cc.total}],discount:disc,...cc,sample:true});
     }}
   s1.bills.sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const vendors=VENDORS0.map(v=>({...clone(v),stock:Object.entries(v.stock).map(([pid,a])=>({pid,qty:a[0],price:a[1],moq:a[2]}))}));
+  const vendors=VENDORS0.map((v,vi)=>{const stock=Object.entries(v.stock).map(([pid,a],k)=>{const set=bset(pid),b=set[(vi+k)%set.length][0];return {id:vid(pid,b),pid,brand:b,qty:a[0],price:a[1],moq:a[2]}});
+    (VENDOR_EXTRA[v.id]||[]).forEach(([pid,b,qty,price,moq])=>{if(!stock.some(x=>x.id===vid(pid,b)))stock.push({id:vid(pid,b),pid,brand:b,qty,price,moq})});
+    return {...clone(v),stock}});
   const S=id=>({t:"shop",id}),V=id=>({t:"vendor",id});
-  return {shops,vendors,
+  const vb=(id,pid)=>vItems(vendors.find(v=>v.id===id),pid)[0].brand;
+  return {shops,vendors,brands:BRANDS0.slice(),
     interests:[
-      {id:"i1",kind:"interest",from:S("s1"),to:V("v3"),pid:"mbp-activa",qty:20,price:270,note:"Activa pads keep running out. Can you deliver to Grant Road?",status:"shared",at:at(26)},
-      {id:"i2",kind:"interest",from:S("s1"),to:V("v1"),pid:"eo-5w30",qty:12,price:null,note:"",status:"pending",at:at(1)},
+      {id:"i1",kind:"interest",from:S("s1"),to:V("v3"),pid:"mbp-activa",brand:vb("v3","mbp-activa"),qty:20,price:270,note:"Activa pads keep running out. Can you deliver to Grant Road?",status:"shared",at:at(26)},
+      {id:"i2",kind:"interest",from:S("s1"),to:V("v1"),pid:"eo-5w30",brand:vb("v1","eo-5w30"),qty:12,price:null,note:"",status:"pending",at:at(1)},
       {id:"i3",kind:"interest",from:S("s3"),to:S("s1"),pid:"bs-splendor",qty:15,price:260,note:"Need by Friday for a fleet job.",status:"pending",at:at(3)},
-      {id:"i4",kind:"interest",from:S("s4"),to:V("v1"),pid:"eo-10w30",qty:24,price:325,note:"",status:"shared",at:at(50)},
-      {id:"i5",kind:"interest",from:S("s5"),to:V("v1"),pid:"eo-5w30",qty:6,price:1880,note:"Regular monthly order if price works.",status:"pending",at:at(.7)},
+      {id:"i4",kind:"interest",from:S("s4"),to:V("v1"),pid:"eo-10w30",brand:vb("v1","eo-10w30"),qty:24,price:325,note:"",status:"shared",at:at(50)},
+      {id:"i5",kind:"interest",from:S("s5"),to:V("v1"),pid:"eo-5w30",brand:vb("v1","eo-5w30"),qty:6,price:1880,note:"Regular monthly order if price works.",status:"pending",at:at(.7)},
       {id:"i6",kind:"offer",from:S("s4"),to:S("s1"),pid:"wb-24",qty:10,price:365,note:"Have 12 in stock. Can send with our Monday delivery van.",status:"pending",at:at(4),wid:"w4"},
-      {id:"i7",kind:"interest",from:S("s3"),to:V("v5"),pid:"ty-185",qty:8,price:4550,note:"For a cab fleet. Need fitting-ready by Saturday.",status:"pending",at:at(6)}],
+      {id:"i7",kind:"interest",from:S("s3"),to:V("v5"),pid:"ty-185",brand:vb("v5","ty-185"),qty:8,price:4550,note:"For a cab fleet. Need fitting-ready by Saturday.",status:"pending",at:at(6)}],
     wanted:[
       {id:"w1",shopId:"s4",pid:"ea-m800",qty:1,offer:44000,note:"Customer waiting. Maruti 800 MPFI only.",open:true,at:at(5)},
       {id:"w2",shopId:"s5",pid:"cc-splendor",qty:30,offer:120,note:"Bulk for a two-wheeler service centre.",open:true,at:at(20)},
       {id:"w3",shopId:"s2",pid:"bp-i20",qty:4,offer:1700,note:"",open:true,at:at(8)},
       {id:"w4",shopId:"s1",pid:"wb-24",qty:10,offer:360,note:"No supplier has these right now.",open:true,at:at(9)},
-      {id:"w5",shopId:"s3",pid:"fi-mh",qty:4,offer:8200,note:"Scorpio mHawk injectors, genuine or Bosch only.",open:true,at:at(14)}]};
+      {id:"w5",shopId:"s3",pid:"fi-mh",brand:"Bosch",qty:4,offer:8200,note:"Scorpio mHawk injectors, genuine or Bosch only.",open:true,at:at(14)}]};
 }
-function save(){store("pd5.net",net)}
+function save(){store("pd6.net",net)}
+function demoCart(){const first=pid=>variantsOf(inventory,pid).find(p=>p.stock>0);
+  cart=[["of-swift",12],["sp-4w",4],["af-nexon",1]].map(([pid,qty])=>first(pid)&&{id:first(pid).id,qty}).filter(Boolean);cartCust="c1"}
 
 /* ---------- session & chrome ---------- */
 function setMe(){
@@ -262,7 +299,7 @@ function setMe(){
   cart=[];cartCust="walkin";discount={type:"pct",value:0};slipSent=null;find.pid=null;find.q="";f.q="";$("#fq").value="";$("#q").value="";$("#discVal").value=0;
 }
 function login(t,id){session={t,id};store("pd5.me",session);setMe();
-  if(t==="shop"&&id==="s1"){cart=[{id:"of-swift",qty:12},{id:"sp-4w",qty:4},{id:"af-nexon",qty:1}];cartCust="c1"}
+  if(t==="shop"&&id==="s1"){demoCart()}
   show(t==="shop"?"counter":"vstock")}
 function logout(){session=null;store("pd5.me",null);setMe();show("login")}
 const SHOP_NAV=[["Sell"],["counter","New sale"],["bills","Bills"],["customers","Customers"],["Stock"],["inventory","Inventory"],["reports","Reports"],["Network"],["find","Find stock"],["wanted","Wanted"],["deals","Interests"]];
@@ -290,24 +327,59 @@ function renderLogin(){
 }
 
 /* ---------- counter ---------- */
+// Brand rows that pass the counter's vehicle, brand and search filters. Category is applied separately so chips can count.
+function counterList(){const q=f.q.trim().toLowerCase();
+  return inventory.filter(p=>(f.veh==="all"||p.veh===f.veh||p.veh==="Both")&&(!f.brand||p.brand===f.brand)&&(!q||(p.name+" "+p.fits+" "+p.pn+" "+p.cat+" "+(p.brand||"")).toLowerCase().includes(q)))}
+const groupByPart=list=>{const m=new Map();list.forEach(p=>{const k=pidOf(p);if(!m.has(k))m.set(k,[]);m.get(k).push(p)});return [...m.values()]};
+function groupState(vs){const s=vs.reduce((a,v)=>a+v.stock,0);return s<=0?"out":s<=vs.reduce((a,v)=>a+v.reorder,0)?"low":"ok"}
 function renderCats(){
-  const pool=inventory.filter(p=>f.veh==="all"||p.veh===f.veh||p.veh==="Both");const counts={};pool.forEach(p=>counts[p.cat]=(counts[p.cat]||0)+1);
+  const brands=brandsOf(inventory);if(f.brand&&!brands.includes(f.brand))f.brand="";
+  $("#brandF").innerHTML=`<option value="">All brands</option>`+brands.map(b=>`<option${b===f.brand?" selected":""}>${esc(b)}</option>`).join("");
+  const counts={},seen=new Set();counterList().forEach(p=>{if(seen.has(pidOf(p)))return;seen.add(pidOf(p));counts[p.cat]=(counts[p.cat]||0)+1});
   const list=["All",...CATS.filter(c=>counts[c])];if(!list.includes(f.cat))f.cat="All";
-  $("#cats").innerHTML=list.map(c=>`<button class="chip" data-cat="${esc(c)}" aria-pressed="${c===f.cat}">${esc(c.toUpperCase())}<span class="n">${c==="All"?pool.length:counts[c]}</span></button>`).join("");
+  $("#cats").innerHTML=list.map(c=>`<button class="chip" data-cat="${esc(c)}" aria-pressed="${c===f.cat}">${esc(c.toUpperCase())}<span class="n">${c==="All"?seen.size:counts[c]}</span></button>`).join("");
 }
 function renderGrid(){
-  const q=f.q.trim().toLowerCase();
-  const list=inventory.filter(p=>(f.veh==="all"||p.veh===f.veh||p.veh==="Both")&&(f.cat==="All"||p.cat===f.cat)&&(!q||(p.name+" "+p.fits+" "+p.pn+" "+p.cat).toLowerCase().includes(q)));
+  const groups=groupByPart(counterList().filter(p=>f.cat==="All"||p.cat===f.cat));
   const inCart=Object.fromEntries(cart.map(l=>[l.id,l.qty]));
-  $("#grid").innerHTML=`<button class="tile add" data-goadd>${ic("plus")}Add part</button>`+(list.length?list.map(p=>{const st=stockState(p),qty=inCart[p.id];
-    return `<button class="tile${qty?" in":""}${st==="out"?" oos":""}" ${st==="out"?`data-oos="${p.id}"`:`data-add="${p.id}"`} aria-label="${st==="out"?"Out of stock: ":"Add "}${esc(p.name)}, ${esc(p.fits)}, ${money0(p.price)}">
-      <span class="tile-art${PHOTOS[p.id]?" photo":""}">${art(p)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
+  $("#grid").innerHTML=`<button class="tile add" data-goadd>${ic("plus")}Add part</button>`+(groups.length?groups.map(vs=>{const p=vs[0],st=groupState(vs),qty=vs.reduce((a,v)=>a+(inCart[v.id]||0),0);
+    const avail=vs.filter(v=>v.stock>0),prices=(avail.length?avail:vs).map(v=>v.price),lo=Math.min(...prices),multi=vs.length>1,stock=vs.reduce((a,v)=>a+v.stock,0);
+    const brands=[...new Set(vs.slice().sort((a,b)=>a.price-b.price).map(v=>v.brand).filter(Boolean))].join(", ");
+    return `<button class="tile${qty?" in":""}${st==="out"?" oos":""}" data-part="${esc(pidOf(p))}" aria-label="${st==="out"?"Out of stock: ":multi?"Choose a brand of ":"Add "}${esc(multi?p.name:full(p))}, ${esc(p.fits)}, ${multi?"from ":""}${money0(lo)}">
+      <span class="tile-art${PHOTOS[pidOf(p)]?" photo":""}">${art(p)}<span class="veh">${p.veh==="Both"?"2W·4W":p.veh}</span>${qty?`<span class="badge">${qty}</span>`:""}</span>
       <span class="tile-body"><span class="tile-name">${esc(p.name)}</span><span class="tile-fits">${esc(p.fits)}</span>
-      <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":p.stock+" left"}</span><span class="price">${money0(p.price)}</span></span></span></button>`}).join("")
-    :`<div class="empty" style="grid-column:2/-1">No parts match “${esc(f.q)}”. <button class="btn-link" data-findq="${esc(f.q)}">Search suppliers and shops</button></div>`);
+      <span class="tile-brands">${multi?`${vs.length} brands · `:""}${esc(brands||"No brand")}</span>
+      <span class="tile-foot"><span class="stock s-${st}">${st==="out"?"Out":stock+" left"}</span><span class="price">${multi&&Math.max(...prices)>lo?`<small>from </small>`:""}${money0(lo)}</span></span></span></button>`}).join("")
+    :`<div class="empty" style="grid-column:2/-1">No parts match${f.q?` “${esc(f.q)}”`:""}${f.brand?` in ${esc(f.brand)}`:""}. <button class="btn-link" data-findq="${esc(f.q)}">Search suppliers and shops</button></div>`);
 }
+// Tapping a card: one brand goes straight on the bill; several brands open the brand picker.
+function tapPart(pid){
+  const vs=counterList().filter(p=>pidOf(p)===pid),avail=vs.filter(v=>v.stock>0);if(!vs.length)return;
+  if(!avail.length){find.pid=cat(pid)?pid:null;find.q=find.pid?"":vs[0].name;$("#fq").value=find.q;toast(`${vs.length>1?vs[0].name:full(vs[0])} is out of stock. Showing who has it.`);return show("find")}
+  if(vs.length===1){addToCart(vs[0].id,1);if(matchMedia("(max-width:900px)").matches)toast("Added "+full(vs[0]));return}
+  openBrandPick(pid);
+}
+// Brand picker: set a quantity per brand, then Confirm writes them all to the bill. Quantities start at what is already on the bill.
+function openBrandPick(pid){
+  const vs=counterList().filter(p=>pidOf(p)===pid).sort((a,b)=>(b.stock>0)-(a.stock>0)||a.price-b.price),p=vs[0];
+  const inCart=Object.fromEntries(cart.map(l=>[l.id,l.qty]));
+  openOverlay(`<form class="modal" id="pickForm" novalidate><div class="modal-head"><div><span class="label">Choose brands · cheapest first</span><h2>${esc(p.name)}</h2><div class="faint">${esc(p.fits)}</div></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
+    <ul class="src brandpick">${vs.map(v=>{const st=stockState(v),q=inCart[v.id]||0,nm=esc(full(v));
+      return `<li class="src-row${q?" on":""}"><div class="src-main"><div class="src-title"><span class="src-name">${esc(v.brand||"No brand")}</span><span class="price">${money0(v.price)}</span></div>
+        <div class="src-meta"><span class="stock s-${st}">${st==="out"?"Out of stock":v.stock+" left"}</span> · <span class="mono">${esc(v.pn)}</span>${v.tiers[0]?` · ${v.tiers[0].min}+ at ${money0(v.tiers[0].price)} each`:""}</div></div>
+        <div class="src-side">${st==="out"?"":`<div class="stepper"><button type="button" data-pstep="-1" data-v="${esc(v.id)}" aria-label="One less ${nm}">−</button><input type="number" min="0" max="${v.stock}" step="1" value="${q}" data-pq="${esc(v.id)}" data-was="${q}" aria-label="Quantity of ${nm}"><button type="button" data-pstep="1" data-v="${esc(v.id)}" aria-label="One more ${nm}">+</button></div>`}</div></li>`}).join("")}</ul>
+    ${vs.length<variantsOf(inventory,pid).length?`<p class="faint small" style="margin:0">Some brands are hidden by your search or brand filter.</p>`:""}
+    <div class="pick-sum" id="pickSum" aria-live="polite"></div><span class="err" id="pickErr" role="alert"></span>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">Confirm</button><button type="button" class="btn-link" data-close>Cancel</button></div></form>`,"Choose brands");
+  updatePick();
+  const first=$("#pickForm [data-pq]");if(first)first.focus();
+}
+function pickRows(){return [...document.querySelectorAll("#pickForm [data-pq]")].map(i=>{const v=inventory.find(x=>x.id===i.dataset.pq);return {v,i,qty:Math.min(Math.max(Math.floor(Number(i.value)||0),0),v.stock),was:+i.dataset.was}})}
+function updatePick(){const rows=pickRows(),on=rows.filter(r=>r.qty>0),units=on.reduce((a,r)=>a+r.qty,0),amt=on.reduce((a,r)=>a+unitRate(r.v,r.qty)*r.qty,0);
+  rows.forEach(r=>r.i.closest(".src-row").classList.toggle("on",r.qty>0));
+  $("#pickSum").innerHTML=units?`<span>${on.map(r=>r.qty+" × "+esc(r.v.brand||"No brand")).join(" + ")}</span><b>${units} unit${units>1?"s":""} · ${money0(r2(amt))}</b>`:`<span class="faint">Use + to choose how many of each brand.</span>`;$("#pickErr").textContent=""}
 function setQty(id,qty){const p=inventory.find(x=>x.id===id),line=cart.find(l=>l.id===id);if(!line)return;qty=Math.floor(Number(qty)||0);
-  if(qty<=0)cart=cart.filter(l=>l.id!==id);else if(qty>p.stock){line.qty=p.stock;toast(`Only ${p.stock} of ${p.name} in stock`)}else line.qty=qty;slipSent=null;renderCounter()}
+  if(qty<=0)cart=cart.filter(l=>l.id!==id);else if(qty>p.stock){line.qty=p.stock;toast(`Only ${p.stock} of ${full(p)} in stock`)}else line.qty=qty;slipSent=null;renderCounter()}
 function addToCart(id,n=1){const p=inventory.find(x=>x.id===id);if(!p||p.stock<=0)return;const line=cart.find(l=>l.id===id);
   if(line)setQty(id,line.qty+n);else{cart.push({id,qty:Math.min(n,p.stock)});slipSent=null;renderCounter()}}
 const billNo=()=>me.prefix+"/"+fy(new Date())+"/"+String(bills.length+1).padStart(4,"0");
@@ -384,8 +456,8 @@ function openSlip(){
   const items=cart.map(l=>({...inventory.find(x=>x.id===l.id),qty:l.qty})).sort((a,b)=>(a.rack||"").localeCompare(b.rack||""));
   openOverlay(`<div class="modal"><div class="modal-head"><div><span class="label">Pick slip · ${esc(no)}</span><h2>Parts to pull from the store room</h2></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
     <p class="muted" style="margin:0">Sorted by rack so staff can walk the store room once. Tick each part as it reaches the counter.</p>
-    <ul class="slip" style="list-style:none;margin:0;padding:0">${items.map(p=>`<li><span class="rack">${esc(p.rack||"—")}</span><div><b style="font-weight:600">${esc(p.name)}</b><div class="faint small">${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></div></div>
-      <label style="display:flex;align-items:center;gap:12px"><span class="q">×${p.qty}</span><input type="checkbox" aria-label="Picked ${esc(p.name)}"></label></li>`).join("")}</ul>
+    <ul class="slip" style="list-style:none;margin:0;padding:0">${items.map(p=>`<li><span class="rack">${esc(p.rack||"—")}</span><div><b style="font-weight:600">${esc(full(p))}</b><div class="faint small">${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></div></div>
+      <label style="display:flex;align-items:center;gap:12px"><span class="q">×${p.qty}</span><input type="checkbox" aria-label="Picked ${esc(full(p))}"></label></li>`).join("")}</ul>
     <div class="form-actions"><button class="btn btn-primary" id="sendSlip" data-no="${esc(no)}">${slipSent?"Done":"Send to store room"}</button><button class="btn btn-secondary btn-sm" id="copySlip">Copy slip text</button><button type="button" class="btn-link" data-close>Cancel</button></div></div>`,"Pick slip");
 }
 
@@ -473,21 +545,53 @@ function renderBills(){
     :`<tr><td colspan="7" style="text-align:center;color:var(--faint);padding:var(--lg)">No bills yet. Completed sales appear here.</td></tr>`;
 }
 
+/* brands: everyone picks from one shared list so the same brand is always spelled the same way */
+const NEW_BRAND="__new";
+function fillBrandSel(el,{any,add}={}){if(!el)return;const keep=el.value;
+  el.innerHTML=(any?`<option value="">${esc(any)}</option>`:`<option value="">Choose a brand</option>`)+net.brands.map(b=>`<option>${esc(b)}</option>`).join("")+(add?`<option value="${NEW_BRAND}">+ Add a new brand</option>`:"");
+  if(keep&&[...el.options].some(o=>o.value===keep))el.value=keep}
+// Returns {brand} or {err}. A typed brand that matches one on the list (ignoring case, spaces and dots) uses the listed spelling.
+function readBrand(sel){
+  if(sel.value!==NEW_BRAND)return sel.value?{brand:sel.value}:{err:"Choose a brand. If it's not in the list, pick “+ Add a new brand”."};
+  let typed=$("#"+sel.id+"New").value.trim().replace(/\s+/g," ");if(!typed)return {err:"Type the new brand's name."};
+  if(typed===typed.toLowerCase())typed=typed.replace(/\b\w/g,c=>c.toUpperCase());
+  const hit=net.brands.find(b=>slug(b)===slug(typed));if(hit)return {brand:hit,matched:true};
+  return {brand:typed,added:true};
+}
+// Call once the form is valid, so a failed save doesn't leave a half-added brand on the list.
+function keepBrand(r){if(r.added&&!net.brands.includes(r.brand)){net.brands.push(r.brand);net.brands.sort((a,b)=>a.localeCompare(b))}}
+const brandNote=r=>r.added?` ${r.brand} is now on the brand list.`:r.matched?` Used ${r.brand} from the brand list.`:"";
+function resetBrandSel(sel){sel.value="";const n=$("#"+sel.id+"New");if(n){n.value="";n.hidden=true}}
+
 /* inventory */
 function renderInventory(){
+  fillBrandSel($("#fBrand"),{add:true});
   const q=inv.q.trim().toLowerCase();
-  const list=inventory.filter(p=>(!inv.low||stockState(p)!=="ok")&&(!q||(p.name+" "+p.fits+" "+p.pn+" "+p.cat+" "+(p.rack||"")).toLowerCase().includes(q)));
-  const low=inventory.filter(p=>stockState(p)==="low").length,out=inventory.filter(p=>stockState(p)==="out").length;
-  $("#invSummary").textContent=`${inventory.length} parts · stock worth ${money0(Math.round(inventory.reduce((a,p)=>a+(p.cost||0)*p.stock,0)))} at cost · ${low} low, ${out} out of stock`;
+  const list=inventory.filter(p=>(!inv.low||stockState(p)!=="ok")&&(!q||(p.name+" "+p.fits+" "+p.pn+" "+p.cat+" "+(p.rack||"")+" "+(p.brand||"")).toLowerCase().includes(q)));
+  const low=inventory.filter(p=>stockState(p)==="low").length,out=inventory.filter(p=>stockState(p)==="out").length,parts=new Set(inventory.map(pidOf)).size;
+  $("#invSummary").textContent=`${parts} parts in ${inventory.length} brands · stock worth ${money0(Math.round(inventory.reduce((a,p)=>a+(p.cost||0)*p.stock,0)))} at cost · ${low} low, ${out} out of stock`;
+  const firstOf=new Set();
   $("#invBody").innerHTML=list.length?list.map(p=>{const st=stockState(p),m=p.price>0&&p.cost?(p.price-p.cost)/p.price*100:null,mc=m===null?"":m>=20?"m-ok":m>=12?"m-low":"m-bad";
-    return `<tr class="${st!=="ok"?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div></td>
+    const pid=pidOf(p),first=!firstOf.has(pid);firstOf.add(pid);
+    return `<tr class="${st!=="ok"?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(full(p))}</b><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div></td>
     <td><span class="mono">${esc(p.rack||"—")}</span></td><td><span class="veh">${p.veh==="Both"?"2W · 4W":p.veh}</span></td>
-    <td class="r"><input class="input cell-in" type="number" min="0" id="stock-${p.id}" data-stock="${p.id}" value="${p.stock}" aria-label="Stock of ${esc(p.name)}"></td>
+    <td class="r"><input class="input cell-in" type="number" min="0" id="stock-${esc(p.id)}" data-stock="${esc(p.id)}" value="${p.stock}" aria-label="Stock of ${esc(full(p))}"></td>
     <td class="r num">${p.cost?money0(p.cost):"—"}</td><td class="r num">${money0(p.price)}${p.tiers.length?`<div class="small" style="color:var(--steel)">${p.tiers[0].min}+ @ ${money0(p.tiers[0].price)}</div>`:""}</td>
     <td class="r">${m===null?"—":`<span class="margin ${mc}">${money0(p.price-p.cost)} · ${m.toFixed(0)}%</span>`}</td>
     <td><span class="status st-${st}">${st==="ok"?"In stock":st==="low"?"Reorder":"Out of stock"}</span></td>
-    <td>${st!=="ok"&&cat(p.id)?`<button class="btn btn-secondary btn-sm" data-find="${p.id}">Find stock</button>`:""}</td></tr>`}).join("")
+    <td><div class="row-actions">${first?`<button class="btn btn-secondary btn-sm" data-addbrand="${esc(pid)}">Add brand</button>`:""}${st!=="ok"&&cat(pid)?`<button class="btn btn-secondary btn-sm" data-find="${esc(pid)}">Find stock</button>`:""}</div></td></tr>`}).join("")
     :`<tr><td colspan="9" style="text-align:center;color:var(--faint);padding:var(--lg)">Nothing matches. Clear the search or add this part.</td></tr>`;
+}
+// Stock another brand of a part the shop already sells. Name, fits, category and HSN come from the part.
+function openAddBrand(pid){const vs=variantsOf(inventory,pid),p=vs[0];
+  openOverlay(`<form class="modal" id="brandForm" data-pid="${esc(pid)}" novalidate><div class="modal-head"><div><span class="label">Add a brand</span><h2>${esc(p.name)}</h2><div class="faint">${esc(p.fits)}${vs.some(v=>v.brand)?` · you stock ${esc(brandsOf(vs).join(", "))}`:""}</div></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
+    <div class="field"><label for="bBrand">Brand</label><select class="input" id="bBrand" data-brandsel></select><input class="input" id="bBrandNew" hidden placeholder="Type the new brand's name" aria-label="New brand name"></div>
+    <div class="pair"><div class="field"><label for="bPn">Part number</label><input class="input mono" id="bPn" placeholder="Auto if blank"></div><div class="field"><label for="bRack">Rack / bin</label><input class="input mono" id="bRack" value="${esc(p.rack||"")}"></div></div>
+    <div class="pair"><div class="field"><label for="bCost">Cost price (₹)</label><input class="input num" id="bCost" type="number" min="0" step="0.01"></div><div class="field"><label for="bPrice">Selling price (₹, before GST)</label><input class="input num" id="bPrice" type="number" min="0" step="0.01"></div></div>
+    <div class="pair"><div class="field"><label for="bStock">Opening stock</label><input class="input num" id="bStock" type="number" min="0" step="1"></div><div class="field"><label for="bReorder">Reorder level</label><input class="input num" id="bReorder" type="number" min="0" step="1" value="${p.reorder||5}"></div></div>
+    <span class="err" id="bErr" role="alert"></span>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">Save brand</button><button type="button" class="btn-link" data-close>Cancel</button></div></form>`,"Add a brand");
+  fillBrandSel($("#bBrand"),{add:true});$("#bBrand").focus();
 }
 
 /* reports */
@@ -515,47 +619,53 @@ function renderReports(){
     `<section class="panel"><div class="panel-h"><h2>Payments by mode</h2><span class="faint small">${range==="7"?"last 7 days":"today"}</span></div>${Object.keys(modes).length?bars(["Cash","UPI","Card","Credit"].filter(m=>modes[m]).map(m=>({l:m==="Credit"?"Khata":m,v:modes[m]})),money0):`<p class="faint">No payments yet.</p>`}</section>
     <section class="panel"><div class="panel-h"><h2>Top parts by sales</h2><span class="faint small">before GST</span></div>${top.length?bars(top,money0):`<p class="faint">No sales yet.</p>`}</section>
     <section class="panel"><div class="panel-h"><h2>Khata to collect</h2><button class="btn-link" data-view="customers">All customers</button></div>${debtors.length?`<div>${debtors.map(c=>`<div class="debt"><span>${esc(c.name)}<br><span class="faint small">${esc(c.type)}</span></span><b style="color:var(--bad)">${money0(c.due)}</b></div>`).join("")}</div>`:`<p class="faint">Nobody owes you.</p>`}</section>
-    <section class="panel"><div class="panel-h"><h2>Needs reordering</h2><button class="btn-link" data-view="find">Find stock</button></div>${low.length?`<div>${low.map(p=>`<div class="debt"><span>${esc(p.name)}<br><span class="faint small">${esc(p.fits)}</span></span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out"}</span></div>`).join("")}</div>`:`<p class="faint">Everything is above its reorder level.</p>`}</section>`;
+    <section class="panel"><div class="panel-h"><h2>Needs reordering</h2><button class="btn-link" data-view="find">Find stock</button></div>${low.length?`<div>${low.map(p=>`<div class="debt"><span>${esc(full(p))}<br><span class="faint small">${esc(p.fits)}</span></span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out"}</span></div>`).join("")}</div>`:`<p class="faint">Everything is above its reorder level.</p>`}</section>`;
 }
 
 /* find stock */
-function statusOrCta(toRef,pid){const ex=myInterest(toRef,pid);
+function statusOrCta(toRef,pid,brand){const ex=myInterest(toRef,pid,brand);
   if(ex&&ex.status==="shared")return `<button class="status st-shared" data-view="deals" style="border:0">Number shared · view</button>`;
   if(ex)return `<span class="status st-wait">Interest sent ${ago(ex.at)}</span>`;
-  return `<button class="btn btn-primary btn-sm" data-interest="${toRef.t}:${toRef.id}:${pid}">I'm interested</button>`}
-function partSources(p){
-  const mine=inventory.find(x=>x.id===p.id);
-  const vend=net.vendors.map(v=>({v,it:vItem(v,p.id)})).filter(x=>x.it).sort((a,b)=>(b.it.qty>0)-(a.it.qty>0)||km(me,a.v)-km(me,b.v));
-  const shops=shopsVisibleTo(me).map(s=>({s,it:s.inventory.find(x=>x.id===p.id)})).filter(x=>x.it&&x.it.stock>0).sort((a,b)=>km(me,a.s)-km(me,b.s));
-  const myStatus=mine?`<span class="status st-${stockState(mine)}">${stockState(mine)==="out"?"You're out":"You have "+mine.stock}</span>`:`<span class="status st-off">Not in your inventory</span>`;
-  const vRows=vend.length?vend.map(({v,it})=>`<li class="src-row"><div class="src-main"><div class="src-title"><span class="src-name">${esc(v.name)}</span><span class="tag tag-net">Supplier</span><span class="pricechip">${money0(it.price)} / unit</span></div>
+  return `<button class="btn btn-primary btn-sm" data-interest="${toRef.t}:${toRef.id}:${esc(pid)}" data-brand="${esc(brand||"")}">I'm interested</button>`}
+const myStock=(pid,brand)=>variantsOf(inventory,pid).filter(v=>!brand||v.brand===brand).reduce((a,v)=>a+v.stock,0);
+const pname=(pid,brand)=>(brand?brand+" ":"")+cat(pid).name;
+// One part across the network. When brand is set (searched for, or asked for in a Wanted post), only that brand is listed.
+function partSources(p,brand){
+  const mine=variantsOf(inventory,p.id),have=mine.reduce((a,v)=>a+v.stock,0);
+  const vend=net.vendors.flatMap(v=>vItems(v,p.id).filter(it=>!brand||it.brand===brand).map(it=>({v,it}))).sort((a,b)=>(b.it.qty>0)-(a.it.qty>0)||km(me,a.v)-km(me,b.v)||a.it.price-b.it.price);
+  const shops=shopsVisibleTo(me).map(s=>({s,vs:variantsOf(s.inventory,p.id).filter(v=>v.stock>0&&(!brand||v.brand===brand))})).filter(x=>x.vs.length).sort((a,b)=>km(me,a.s)-km(me,b.s));
+  const myStatus=mine.length?`<span class="status st-${groupState(mine)}">${have<=0?"You're out":"You have "+have}</span>`:`<span class="status st-off">Not in your inventory</span>`;
+  const vRows=vend.length?vend.map(({v,it})=>`<li class="src-row"><div class="src-main"><div class="src-title"><span class="src-name">${esc(v.name)}</span><span class="tag tag-net">Supplier</span><span class="brandchip">${esc(it.brand)}</span><span class="pricechip">${money0(it.price)} / unit</span></div>
       <div class="src-meta">${esc(v.area)} · ${kmTxt(me,v)} · min order ${it.moq}</div></div>
-      <div class="src-side">${it.qty>0?`<span class="stock s-${it.qty<=it.moq*2?"low":"ok"}">${it.qty} in stock</span>`+statusOrCta({t:"vendor",id:v.id},p.id):`<span class="stock s-out">Out of stock</span>`}</div></li>`).join(""):`<li class="src-row faint">No supplier lists this part yet.</li>`;
-  const sRows=shops.length?shops.map(({s,it})=>`<li class="src-row"><div class="src-main"><div class="src-title"><span class="src-name">${esc(s.name)}</span><span class="tag">Shop</span></div><div class="src-meta">${esc(s.area)} · ${kmTxt(me,s)}</div></div>
-      <div class="src-side"><span class="stock s-${stockState(it)==="low"?"low":"ok"}">${stockState(it)==="low"?"Limited stock":"Has stock"}</span>${statusOrCta({t:"shop",id:s.id},p.id)}</div></li>`).join(""):`<li class="src-row faint">No shop more than ${HIDE_KM} km away has it in stock.</li>`;
+      <div class="src-side">${it.qty>0?`<span class="stock s-${it.qty<=it.moq*2?"low":"ok"}">${it.qty} in stock</span>`+statusOrCta({t:"vendor",id:v.id},p.id,it.brand):`<span class="stock s-out">Out of stock</span>`}</div></li>`).join(""):`<li class="src-row faint">No supplier lists ${brand?esc(brand)+" for ":""}this part yet.</li>`;
+  const sRows=shops.length?shops.map(({s,vs})=>`<li class="src-row"><div class="src-main"><div class="src-title"><span class="src-name">${esc(s.name)}</span><span class="tag">Shop</span>${brandsOf(vs).map(b=>`<span class="brandchip">${esc(b)}</span>`).join("")}</div><div class="src-meta">${esc(s.area)} · ${kmTxt(me,s)}</div></div>
+      <div class="src-side"><span class="stock s-${groupState(vs)==="low"?"low":"ok"}">${groupState(vs)==="low"?"Limited stock":"Has stock"}</span>${statusOrCta({t:"shop",id:s.id},p.id,brand)}</div></li>`).join(""):`<li class="src-row faint">No shop more than ${HIDE_KM} km away has ${brand?esc(brand)+" for ":""}it in stock.</li>`;
   const any=vend.some(x=>x.it.qty>0)||shops.length;
-  return `<section class="fpart"><div class="fpart-head"><div class="pcell"><span class="thumb">${art(p)}</span><div><h2>${esc(p.name)}</h2><span>${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span></div></div>${myStatus}</div>
+  return `<section class="fpart"><div class="fpart-head"><div class="pcell"><span class="thumb">${art(p)}</span><div><h2>${esc(p.name)}</h2><span>${esc(p.fits)}${brand?` · showing <b>${esc(brand)}</b> only`:""}</span></div></div>${myStatus}</div>
     <div class="group-label"><span class="label">Suppliers</span><span class="faint small">Exact stock, kept current by the supplier</span></div><ul class="src">${vRows}</ul>
     <div class="group-label"><span class="label">Shops more than ${HIDE_KM} km away</span><span class="faint small">Shops never see each other's quantities</span></div><ul class="src">${sRows}</ul>
-    <div class="fpart-foot"><span>${any?"Need more than they have?":"Nobody has it in stock right now."}</span><button class="btn ${any?"btn-secondary":"btn-primary"} btn-sm" data-want="${p.id}">Post to Wanted</button></div></section>`;
+    <div class="fpart-foot"><span>${any?"Need more than they have?":"Nobody has it in stock right now."}</span><button class="btn ${any?"btn-secondary":"btn-primary"} btn-sm" data-want="${esc(p.id)}" data-brand="${esc(brand||"")}">Post to Wanted</button></div></section>`;
 }
 function renderFind(){
   const near=net.shops.filter(s=>s.id!==me.id&&km(me,s)<=HIDE_KM).length;
   $("#hideNote").textContent=`Shops within ${HIDE_KM} km of you are hidden, and you're hidden from them${near?` (${near} nearby shop${near>1?"s":""})`:""}. Suppliers show wherever they are.`;
   const q=find.q.trim().toLowerCase(),out=$("#findOut");
-  const parts=find.pid?[cat(find.pid)]:q?CATALOG.filter(p=>(p.name+" "+p.fits+" "+p.pn+" "+p.cat).toLowerCase().includes(q)).slice(0,6):null;
-  if(!parts){const low=inventory.filter(p=>stockState(p)!=="ok"&&cat(p.id)).sort((a,b)=>a.stock-b.stock);
-    out.innerHTML=`<div><h2 class="section-h">Running low at your shop</h2>${low.length?`<ul class="lowlist">${low.map(p=>{const n=net.vendors.filter(v=>(vItem(v,p.id)||{}).qty>0).length;
-      return `<li><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out of stock"}</span> · ${n?n+" supplier"+(n>1?"s have":" has")+" it":"no supplier has it"}</span></div></div>
-      <button class="btn btn-secondary btn-sm" data-find="${p.id}">Find stock</button></li>`}).join("")}</ul>`:`<div class="empty">Everything is above its reorder level.</div>`}</div>`;return}
-  out.innerHTML=(find.pid?`<div><button class="btn-link" id="clearFind">← Back to all parts</button></div>`:"")+(parts.length?parts.map(partSources).join(""):`<div class="empty">No part in the network matches “${esc(find.q)}”. Try the vehicle model or part number.</div>`);
+  // A brand typed in the search ("bosch spark plug") narrows results to that brand; the other words find the part.
+  const brand=q?net.brands.slice().sort((a,b)=>b.length-a.length).find(b=>(" "+q+" ").includes(" "+b.toLowerCase()+" ")):"";
+  const words=(brand?q.replace(brand.toLowerCase()," "):q).split(/\s+/).filter(Boolean);
+  const parts=find.pid?[cat(find.pid)]:q?CATALOG.filter(p=>{const h=(p.name+" "+p.fits+" "+p.pn+" "+p.cat).toLowerCase();return words.every(w=>h.includes(w))&&(!brand||bset(p.id).some(b=>b[0]===brand)||net.vendors.some(v=>vItem(v,vid(p.id,brand))))}).slice(0,6):null;
+  if(!parts){const low=inventory.filter(p=>stockState(p)!=="ok"&&cat(pidOf(p))).sort((a,b)=>a.stock-b.stock);
+    out.innerHTML=`<div><h2 class="section-h">Running low at your shop</h2>${low.length?`<ul class="lowlist">${low.map(p=>{const n=net.vendors.filter(v=>(vItem(v,p.id)||{}).qty>0).length,b=esc(p.brand||"it");
+      return `<li><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(full(p))}</b><span><span class="stock s-${stockState(p)}">${p.stock?p.stock+" left":"Out of stock"}</span> · ${n?n+" supplier"+(n>1?"s have ":" has ")+b:"no supplier has "+b}</span></div></div>
+      <button class="btn btn-secondary btn-sm" data-find="${esc(pidOf(p))}">Find stock</button></li>`}).join("")}</ul>`:`<div class="empty">Everything is above its reorder level.</div>`}</div>`;return}
+  out.innerHTML=(find.pid?`<div><button class="btn-link" id="clearFind">← Back to all parts</button></div>`:"")+(parts.length?parts.map(p=>partSources(p,brand)).join(""):`<div class="empty">No part in the network matches “${esc(find.q)}”. Try the vehicle model or part number.</div>`);
 }
 
 /* interests */
 function dealCard(i){
-  const out=isMe(i.from),other=acct(out?i.to:i.from),p=cat(i.pid),who=out?i.to:i.from;
+  const out=isMe(i.from),other=acct(out?i.to:i.from),nm=pname(i.pid,i.brand),who=out?i.to:i.from;
   const typeTag=who.t==="vendor"?'<span class="tag tag-net">Supplier</span>':'<span class="tag">Shop</span>';
-  const title=out?(i.kind==="offer"?`You offered ${i.qty} × ${p.name}`:`You asked for ${i.qty} × ${p.name}`):(i.kind==="offer"?`${other.name} can supply ${i.qty} × ${p.name}`:`${other.name} wants ${i.qty} × ${p.name}`);
+  const title=out?(i.kind==="offer"?`You offered ${i.qty} × ${nm}`:`You asked for ${i.qty} × ${nm}`):(i.kind==="offer"?`${other.name} can supply ${i.qty} × ${nm}`:`${other.name} wants ${i.qty} × ${nm}`);
   const st=i.status==="shared"?['st-shared','Numbers shared']:i.status==="declined"?['st-off',out?'Declined':'You declined']:out?['st-wait','Waiting for reply']:['st-need','Needs your reply'];
   const price=i.price?`${out?"Your":"Their"} price ${money0(i.price)} / unit`:"No price given";
   let body="";
@@ -578,17 +688,17 @@ function renderDeals(){
 
 /* wanted */
 function renderWanted(){
-  const keep=$("#wPart").value;$("#wPart").innerHTML=CATALOG.map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("");if(keep)$("#wPart").value=keep;
+  fillBrandSel($("#wBrand"),{any:"Any brand"});const keep=$("#wPart").value;$("#wPart").innerHTML=CATALOG.map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("");if(keep)$("#wPart").value=keep;
   $("#wReach").textContent=`Shown to ${shopsVisibleTo(me).length} shops more than ${HIDE_KM} km away.`;
   const vis=net.wanted.filter(w=>w.open&&w.shopId!==me.id&&canSee(me,net.shops.find(s=>s.id===w.shopId))).sort((a,b)=>new Date(b.at)-new Date(a.at));
-  $("#wantedList").innerHTML=vis.length?vis.map(w=>{const s=net.shops.find(x=>x.id===w.shopId),p=cat(w.pid),mine=inventory.find(x=>x.id===w.pid),sent=net.interests.find(i=>isMe(i.from)&&i.wid===w.id);
-    const cta=sent?(sent.status==="shared"?`<button class="status st-shared" data-view="deals" style="border:0">Numbers shared · view</button>`:`<span class="status st-wait">Offer sent ${ago(sent.at)}</span>`):mine&&mine.stock>0?`<button class="btn btn-primary btn-sm" data-have="${w.id}">I have this</button><span class="faint small">You have ${mine.stock}</span>`:`<span class="faint small">Not in your stock</span>`;
-    return `<article class="deal"><div class="deal-top"><span class="tag">Shop</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(p.name)}</h3>
-      <div class="deal-meta">${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></div><div class="deal-meta">${esc(s.name)} · ${esc(s.area)} · ${kmTxt(me,s)}${w.offer?` · offering <b style="color:var(--ink)">${money0(w.offer)}</b> / unit`:""}</div>
+  $("#wantedList").innerHTML=vis.length?vis.map(w=>{const s=net.shops.find(x=>x.id===w.shopId),p=cat(w.pid),mine=myStock(w.pid,w.brand),sent=net.interests.find(i=>isMe(i.from)&&i.wid===w.id);
+    const cta=sent?(sent.status==="shared"?`<button class="status st-shared" data-view="deals" style="border:0">Numbers shared · view</button>`:`<span class="status st-wait">Offer sent ${ago(sent.at)}</span>`):mine>0?`<button class="btn btn-primary btn-sm" data-have="${w.id}">I have this</button><span class="faint small">You have ${mine}</span>`:`<span class="faint small">${w.brand?"No "+esc(w.brand)+" in your stock":"Not in your stock"}</span>`;
+    return `<article class="deal"><div class="deal-top"><span class="tag">Shop</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(pname(w.pid,w.brand))}</h3>
+      <div class="deal-meta">${esc(p.fits)} · ${w.brand?`only ${esc(w.brand)}`:"any brand"}</div><div class="deal-meta">${esc(s.name)} · ${esc(s.area)} · ${kmTxt(me,s)}${w.offer?` · offering <b style="color:var(--ink)">${money0(w.offer)}</b> / unit`:""}</div>
       ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-actions">${cta}</div></article>`}).join(""):`<div class="empty" style="grid-column:1/-1">No open requests from shops in other areas right now.</div>`;
   const mineW=net.wanted.filter(w=>w.shopId===me.id).sort((a,b)=>b.open-a.open||new Date(b.at)-new Date(a.at));
-  $("#wantedMine").innerHTML=mineW.length?mineW.map(w=>{const p=cat(w.pid),resp=net.interests.filter(i=>i.wid===w.id);
-    return `<article class="deal"><div class="deal-top"><span class="status ${w.open?"st-wait":"st-off"}">${w.open?"Open":"Closed"}</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(p.name)}</h3>
+  $("#wantedMine").innerHTML=mineW.length?mineW.map(w=>{const resp=net.interests.filter(i=>i.wid===w.id);
+    return `<article class="deal"><div class="deal-top"><span class="status ${w.open?"st-wait":"st-off"}">${w.open?"Open":"Closed"}</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(pname(w.pid,w.brand))}</h3>
       <div class="deal-meta">${w.offer?`Your price ${money0(w.offer)} / unit · `:""}${resp.length?`<button class="btn-link" data-view="deals">${resp.length} offer${resp.length>1?"s":""} received</button>`:"No offers yet"}</div>
       ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-actions"><button class="btn-link" data-closepost="${w.id}">${w.open?"Close request":"Reopen"}</button></div></article>`}).join(""):`<div class="empty" style="grid-column:1/-1">You haven't posted anything yet.</div>`;
 }
@@ -598,24 +708,25 @@ function renderVStock(){
   const pin=pendingIn(),out=me.stock.filter(x=>x.qty<=0).length;
   $("#vStats").innerHTML=`<div class="stat hi"><span class="label">Waiting for your reply</span><b>${pin}</b><small>shop requests</small></div><div class="stat"><span class="label">Parts listed</span><b>${me.stock.length}</b></div>
     <div class="stat"><span class="label">Out of stock</span><b>${out}</b></div><div class="stat"><span class="label">Shops that can see you</span><b>${net.shops.length}</b></div>`;
-  $("#vPart").innerHTML=CATALOG.filter(p=>!vItem(me,p.id)).map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("")||`<option value="">All catalogue parts are listed</option>`;
-  const q=vq.trim().toLowerCase(),rows=me.stock.map(it=>({it,p:cat(it.pid)})).filter(({p})=>!q||(p.name+" "+p.fits+" "+p.pn).toLowerCase().includes(q));
-  $("#vBody").innerHTML=rows.length?rows.map(({it,p})=>`<tr class="${it.qty<=0?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${esc(p.name)}</b><span>${esc(p.fits)}</span></div></div></td><td class="mono">${esc(p.pn)}</td>
-    <td class="r"><input class="input cell-in" type="number" min="0" id="vp-${p.id}" data-vprice="${p.id}" value="${it.price}" aria-label="Trade price of ${esc(p.name)}"></td>
-    <td class="r"><input class="input cell-in" type="number" min="1" id="vm-${p.id}" data-vmoq="${p.id}" value="${it.moq}" aria-label="Minimum order for ${esc(p.name)}"></td>
-    <td class="r"><input class="input cell-in" type="number" min="0" id="vq-${p.id}" data-vqty="${p.id}" value="${it.qty}" aria-label="Stock of ${esc(p.name)}"></td>
-    <td>${it.qty>0?`<span class="status st-ok">${it.qty} in stock</span>`:`<span class="status st-out">Out of stock</span>`}</td></tr>`).join(""):`<tr><td colspan="6" style="text-align:center;color:var(--faint);padding:var(--lg)">Nothing listed matches.</td></tr>`;
+  const keep=$("#vPart").value;$("#vPart").innerHTML=CATALOG.map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("");if(keep)$("#vPart").value=keep;
+  fillBrandSel($("#vBrand"),{add:true});
+  const q=vq.trim().toLowerCase(),rows=me.stock.map(it=>({it,p:cat(it.pid)})).filter(({it,p})=>!q||(p.name+" "+p.fits+" "+p.pn+" "+it.brand).toLowerCase().includes(q));
+  $("#vBody").innerHTML=rows.length?rows.map(({it,p})=>{const nm=esc(pname(it.pid,it.brand));return `<tr class="${it.qty<=0?"lowrow":""}"><td><div class="pcell"><span class="thumb">${art(p)}</span><div><b>${nm}</b><span>${esc(p.fits)}</span></div></div></td><td class="mono">${esc(p.pn)}</td>
+    <td class="r"><input class="input cell-in" type="number" min="0" id="vp-${esc(it.id)}" data-vprice="${esc(it.id)}" value="${it.price}" aria-label="Trade price of ${nm}"></td>
+    <td class="r"><input class="input cell-in" type="number" min="1" id="vm-${esc(it.id)}" data-vmoq="${esc(it.id)}" value="${it.moq}" aria-label="Minimum order for ${nm}"></td>
+    <td class="r"><input class="input cell-in" type="number" min="0" id="vq-${esc(it.id)}" data-vqty="${esc(it.id)}" value="${it.qty}" aria-label="Stock of ${nm}"></td>
+    <td>${it.qty>0?`<span class="status st-ok">${it.qty} in stock</span>`:`<span class="status st-out">Out of stock</span>`}</td></tr>`}).join(""):`<tr><td colspan="6" style="text-align:center;color:var(--faint);padding:var(--lg)">Nothing listed matches.</td></tr>`;
 }
 
 /* interest modal */
-function openInterest(kind,toRef,pid,wid){
-  const to=acct(toRef),p=cat(pid);let qty,price="",min=1,hint,heading;
-  if(kind==="offer"){const w=net.wanted.find(x=>x.id===wid),mine=inventory.find(x=>x.id===pid);qty=Math.min(w.qty,mine.stock);price=w.offer||"";heading=`Offer to ${to.name}`;hint=`They asked for ${w.qty}${w.offer?` at ${money0(w.offer)} each`:""}. You have ${mine.stock} in stock.`}
-  else if(toRef.t==="vendor"){const it=vItem(to,pid),mine=inventory.find(x=>x.id===pid);min=it.moq;qty=Math.max(it.moq,mine?Math.max(mine.reorder*2-mine.stock,0):it.moq);heading=`Ask ${to.name}`;hint=`Trade price ${money0(it.price)} / unit · minimum order ${it.moq} · ${it.qty} in stock`}
-  else{const mine=inventory.find(x=>x.id===pid);qty=mine?Math.max(mine.reorder,1):1;heading=`Ask ${to.name}`;hint="They have it in stock. Shops don't see each other's exact quantities."}
-  openOverlay(`<form class="modal" id="intForm" data-kind="${kind}" data-to="${toRef.t}:${toRef.id}" data-pid="${pid}" data-wid="${wid||""}" data-min="${min}" novalidate>
+function openInterest(kind,toRef,pid,wid,brand){
+  const to=acct(toRef),p=cat(pid),mine=variantsOf(inventory,pid),reorder=mine.reduce((a,v)=>a+v.reorder,0),have=mine.reduce((a,v)=>a+v.stock,0);let qty,price="",min=1,hint,heading;
+  if(kind==="offer"){const w=net.wanted.find(x=>x.id===wid),n=myStock(pid,w.brand);brand=w.brand||"";qty=Math.min(w.qty,n);price=w.offer||"";heading=`Offer to ${to.name}`;hint=`They asked for ${w.qty}${w.offer?` at ${money0(w.offer)} each`:""}${w.brand?`, ${w.brand} only`:""}. You have ${n} in stock.`}
+  else if(toRef.t==="vendor"){const it=vItem(to,vid(pid,brand));min=it.moq;qty=Math.max(it.moq,mine.length?Math.max(reorder*2-have,0):it.moq);heading=`Ask ${to.name}`;hint=`Trade price ${money0(it.price)} / unit · minimum order ${it.moq} · ${it.qty} in stock`}
+  else{qty=mine.length?Math.max(reorder,1):1;heading=`Ask ${to.name}`;hint="They have it in stock. Shops don't see each other's exact quantities."}
+  openOverlay(`<form class="modal" id="intForm" data-kind="${kind}" data-to="${toRef.t}:${toRef.id}" data-pid="${esc(pid)}" data-brand="${esc(brand||"")}" data-wid="${wid||""}" data-min="${min}" novalidate>
     <div class="modal-head"><div><span class="label">${kind==="offer"?"Offer stock":"Send interest"}</span><h2>${esc(heading)}</h2></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
-    <div><b style="font-weight:600">${esc(p.name)}</b> <span class="faint small">${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></span><div class="small" style="color:var(--steel)">${esc(hint)}</div></div>
+    <div><b style="font-weight:600">${esc(pname(pid,brand))}</b> <span class="faint small">${esc(p.fits)}</span><div class="small" style="color:var(--steel)">${esc(hint)}</div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label for="iQty">Quantity</label><input class="input num" id="iQty" type="number" min="${min}" step="1" value="${qty}"></div>
       <div class="field"><label for="iPrice">${kind==="offer"?"Your price":"Price you'd pay"} / unit (₹)</label><input class="input num" id="iPrice" type="number" min="0" step="1" value="${price}" placeholder="Optional"></div></div>
     <div class="field"><label for="iNote">Note</label><textarea class="input" id="iNote" placeholder="${kind==="offer"?"When you can deliver, pickup or courier…":"When you need it, delivery or pickup…"}"></textarea></div>
@@ -652,8 +763,9 @@ document.addEventListener("click",e=>{
   if(ds.themeToggle!==undefined)return setTheme(effTheme()==="dark"?"light":"dark");
   if(ds.login){const [ty,id]=ds.login.split(":");return login(ty,id)}
   if(ds.view){if(!$("#overlay").hidden)closeOverlay(true);return show(ds.view)}
-  if(ds.add){addToCart(ds.add,1);if(matchMedia("(max-width:900px)").matches)toast("Added "+inventory.find(x=>x.id===ds.add).name);return}
-  if(ds.oos){const p=inventory.find(x=>x.id===ds.oos);find.pid=cat(p.id)?p.id:null;find.q=find.pid?"":p.name;$("#fq").value=find.q;toast(`${p.name} is out of stock. Showing who has it.`);return show("find")}
+  if(ds.part)return tapPart(ds.part);
+  if(ds.pstep){const i=document.querySelector(`#pickForm [data-pq="${CSS.escape(ds.v)}"]`);i.value=Math.min(Math.max((Math.floor(Number(i.value))||0)+Number(ds.pstep),0),+i.max);return updatePick()}
+  if(ds.addbrand)return openAddBrand(ds.addbrand);
   if(ds.goadd!==undefined){show("inventory");$("#addForm").hidden=false;return $("#fName").focus()}
   if(ds.cat){f.cat=ds.cat;return renderCounter()}
   if(ds.veh){f.veh=ds.veh;setPressed("#vehSeg",ds.veh,"veh");return renderCounter()}
@@ -671,9 +783,9 @@ document.addEventListener("click",e=>{
   if(ds.bill!==undefined)return showInvoice(bills[+ds.bill],false);
   if(ds.find){find.pid=ds.find;find.q="";$("#fq").value="";return show("find")}
   if(ds.findq!==undefined){find.pid=null;find.q=ds.findq;$("#fq").value=ds.findq;return show("find")}
-  if(ds.interest){const [ty,id,pid]=ds.interest.split(":");return openInterest("interest",{t:ty,id},pid)}
+  if(ds.interest){const [ty,id,pid]=ds.interest.split(":");return openInterest("interest",{t:ty,id},pid,null,ds.brand||"")}
   if(ds.have){const w=net.wanted.find(x=>x.id===ds.have);return openInterest("offer",{t:"shop",id:w.shopId},w.pid,w.id)}
-  if(ds.want){show("wanted");$("#wantForm").hidden=false;$("#wPart").value=ds.want;const mine=inventory.find(x=>x.id===ds.want);$("#wQty").value=mine?Math.max(mine.reorder*2-mine.stock,1):1;return $("#wQty").focus()}
+  if(ds.want){show("wanted");$("#wantForm").hidden=false;$("#wPart").value=ds.want;$("#wBrand").value=ds.brand||"";const mine=variantsOf(inventory,ds.want);$("#wQty").value=mine.length?Math.max(mine.reduce((a,v)=>a+v.reorder*2-v.stock,0),1):1;return $("#wQty").focus()}
   if(ds.share){const i=net.interests.find(x=>x.id===ds.share);i.status="shared";save();rerender();return toast(`Number shared with ${acct(i.from).name}`)}
   if(ds.decline){const i=net.interests.find(x=>x.id===ds.decline);i.status="declined";save();rerender();return toast("Declined. They'll see it was declined.")}
   if(ds.copy)return copy(ds.copy,"Number copied",()=>toast("Copy blocked here. The number is "+ds.copy));
@@ -685,7 +797,7 @@ document.addEventListener("click",e=>{
     case "pickCust":return openCustPicker();
     case "pickBtn":return openSlip();
     case "sendSlip":{if(!slipSent){me.slipSeq=(me.slipSeq||0)+1;slipSent=t.dataset.no;save();toast(`Pick slip ${slipSent} sent to the store room`)}closeOverlay(true);return renderCart()}
-    case "copySlip":{const txt=["PICK SLIP "+(slipSent||""),...cart.map(l=>{const p=inventory.find(x=>x.id===l.id);return `${p.rack||"-"}  ${l.qty} x ${p.name} [${p.pn}]`})].join("\n");return copy(txt,"Slip copied",()=>toast("Copy blocked here."))}
+    case "copySlip":{const txt=["PICK SLIP "+(slipSent||""),...cart.map(l=>{const p=inventory.find(x=>x.id===l.id);return `${p.rack||"-"}  ${l.qty} x ${full(p)} [${p.pn}]`})].join("\n");return copy(txt,"Slip copied",()=>toast("Copy blocked here."))}
     case "clearCart":cart=[];slipSent=null;cartCust="walkin";return renderCounter();
     case "openCart":return openSheet();
     case "closeCart":return closeSheet();
@@ -719,14 +831,23 @@ document.addEventListener("input",e=>{const id=e.target.id;
   else if(id==="discVal"){discount.value=Math.max(0,Number(e.target.value)||0);renderCart()}
   else if(id==="custQ"){$("#custList").innerHTML=custRows([WALKIN,...me.customers],e.target.value)}
   else if(id==="pRecv"||e.target.dataset.split)updatePay();
+  else if(e.target.dataset.pq!==undefined)updatePick();
 });
 document.addEventListener("change",e=>{const d=e.target.dataset;
   if(d.qty)setQty(d.qty,e.target.value);
-  if(d.stock){const p=inventory.find(x=>x.id===d.stock);p.stock=Math.max(0,Math.floor(Number(e.target.value)||0));save();renderInventory();renderChrome();toast(`${p.name}: stock set to ${p.stock}`)}
-  if(d.vqty||d.vprice||d.vmoq){const pid=d.vqty||d.vprice||d.vmoq,it=vItem(me,pid),v=Math.max(0,Math.floor(Number(e.target.value)||0));if(d.vqty)it.qty=v;if(d.vprice)it.price=v;if(d.vmoq)it.moq=Math.max(1,v);save();renderVStock();toast(`${cat(pid).name} updated. Shops see the change now.`)}
+  if(e.target.matches("[data-brandsel]")){const n=$("#"+e.target.id+"New"),isNew=e.target.value===NEW_BRAND;n.hidden=!isNew;if(isNew)n.focus()}
+  if(e.target.id==="brandF"){f.brand=e.target.value;renderCounter()}
+  if(d.stock){const p=inventory.find(x=>x.id===d.stock);p.stock=Math.max(0,Math.floor(Number(e.target.value)||0));save();renderInventory();renderChrome();toast(`${full(p)}: stock set to ${p.stock}`)}
+  if(d.vqty||d.vprice||d.vmoq){const id=d.vqty||d.vprice||d.vmoq,it=vItem(me,id),v=Math.max(0,Math.floor(Number(e.target.value)||0));if(d.vqty)it.qty=v;if(d.vprice)it.price=v;if(d.vmoq)it.moq=Math.max(1,v);save();renderVStock();toast(`${pname(it.pid,it.brand)} updated. Shops see the change now.`)}
 });
 document.addEventListener("submit",e=>{
   e.preventDefault();const fm=e.target;
+  if(fm.id==="pickForm"){const rows=pickRows();
+    if(!rows.some(r=>r.qty!==r.was))return rows.some(r=>r.qty)?(closeOverlay(true),renderCounter()):$("#pickErr").textContent="Choose how many of at least one brand, or tap Cancel.";
+    const over=pickRows().filter(r=>(Number(r.i.value)||0)>r.v.stock);
+    rows.forEach(({v,qty})=>{const line=cart.find(l=>l.id===v.id);if(qty<=0)cart=cart.filter(l=>l.id!==v.id);else if(line)line.qty=qty;else cart.push({id:v.id,qty})});
+    slipSent=null;closeOverlay(true);renderCounter();
+    const on=rows.filter(r=>r.qty>0);return toast(over.length?`Only ${over.map(r=>r.v.stock+" "+r.v.brand).join(", ")} in stock, so the bill has that many.`:on.length?"Bill updated: "+on.map(r=>r.qty+" × "+(r.v.brand||r.v.name)).join(", "):"Removed from the bill")}
   if(fm.id==="payForm"){const m=fm.dataset.mode,T=compute(cart,discount).total;
     if(m==="Cash"){const r=Number($("#pRecv").value)||0;if(r<T)return $("#pErr").textContent="Cash received is less than the total.";return completeSale("Cash",[{mode:"Cash",amount:T}],r>T?"Change "+money0(r-T):"")}
     if(m==="Split"){const parts=[...fm.querySelectorAll("[data-split]")].map(i=>({mode:i.dataset.split,amount:Number(i.value)||0}));if(r2(parts.reduce((a,p)=>a+p.amount,0))!==T)return $("#pErr").textContent="The amounts must add up to the total.";
@@ -739,29 +860,38 @@ document.addEventListener("submit",e=>{
     c.due=r2(c.due-a);save();closeOverlay(true);renderCustomers();return toast(`${money0(a)} received from ${c.name} by ${$("#colMode")?$("#colMode").value:"cash"}`)}
   if(fm.id==="intForm"){const qty=Math.floor(Number($("#iQty").value)),min=+fm.dataset.min,price=$("#iPrice").value===""?null:Number($("#iPrice").value);
     if(!(qty>=1))return $("#iErr").textContent="Enter how many you need.";if(qty<min)return $("#iErr").textContent=`This supplier's minimum order is ${min}.`;
-    if(fm.dataset.kind==="offer"){const mine=inventory.find(x=>x.id===fm.dataset.pid);if(qty>mine.stock)return $("#iErr").textContent=`You only have ${mine.stock} in stock.`}
+    if(fm.dataset.kind==="offer"){const n=myStock(fm.dataset.pid,fm.dataset.brand);if(qty>n)return $("#iErr").textContent=`You only have ${n} in stock.`}
     if(price!==null&&!(price>=0))return $("#iErr").textContent="Enter a price of ₹0 or more, or leave it blank.";
-    const [ty,id]=fm.dataset.to.split(":"),to={t:ty,id};const rec={id:"i"+Date.now(),kind:fm.dataset.kind,from:{t:session.t,id:session.id},to,pid:fm.dataset.pid,qty,price,note:$("#iNote").value.trim(),status:"pending",at:new Date().toISOString()};if(fm.dataset.wid)rec.wid=fm.dataset.wid;
+    const [ty,id]=fm.dataset.to.split(":"),to={t:ty,id};const rec={id:"i"+Date.now(),kind:fm.dataset.kind,from:{t:session.t,id:session.id},to,pid:fm.dataset.pid,brand:fm.dataset.brand||"",qty,price,note:$("#iNote").value.trim(),status:"pending",at:new Date().toISOString()};if(fm.dataset.wid)rec.wid=fm.dataset.wid;
     net.interests.push(rec);save();closeOverlay();return toast(`${fm.dataset.kind==="offer"?"Offer":"Interest"} sent to ${acct(to).name}. Their number appears under Interests when they accept.`)}
   if(fm.id==="wantForm"){const qty=Math.floor(Number($("#wQty").value)),offer=$("#wOffer").value===""?null:Number($("#wOffer").value);if(!(qty>=1))return $("#wErr").textContent="Enter how many you need.";
-    net.wanted.push({id:"w"+Date.now(),shopId:me.id,pid:$("#wPart").value,qty,offer,note:$("#wNote").value.trim(),open:true,at:new Date().toISOString()});save();fm.reset();fm.hidden=true;$("#wErr").textContent="";renderWanted();return toast(`Posted to ${shopsVisibleTo(me).length} shops in other areas`)}
+    net.wanted.push({id:"w"+Date.now(),shopId:me.id,pid:$("#wPart").value,brand:$("#wBrand").value,qty,offer,note:$("#wNote").value.trim(),open:true,at:new Date().toISOString()});save();fm.reset();fm.hidden=true;$("#wErr").textContent="";renderWanted();return toast(`Posted to ${shopsVisibleTo(me).length} shops in other areas`)}
   if(fm.id==="vAddForm"){const pid=$("#vPart").value,qty=Number($("#vQty").value),price=Number($("#vPrice").value),moq=Math.max(1,Math.floor(Number($("#vMoq").value)||1));
-    if(!pid)return $("#vErr").textContent="Every catalogue part is already listed.";if($("#vQty").value===""||!(qty>=0))return $("#vErr").textContent="Enter how many you have (0 is fine).";if(!(price>0))return $("#vErr").textContent="Enter your trade price.";
-    me.stock.unshift({pid,qty:Math.floor(qty),price,moq});save();fm.reset();fm.hidden=true;$("#vErr").textContent="";renderVStock();return toast(`${cat(pid).name} listed. Shops can find it now.`)}
+    const b=readBrand($("#vBrand"));if(b.err)return $("#vErr").textContent=b.err;
+    if(vItem(me,vid(pid,b.brand)))return $("#vErr").textContent=`You already list ${pname(pid,b.brand)}. Change its stock in the table below.`;
+    if($("#vQty").value===""||!(qty>=0))return $("#vErr").textContent="Enter how many you have (0 is fine).";if(!(price>0))return $("#vErr").textContent="Enter your trade price.";
+    keepBrand(b);me.stock.unshift({id:vid(pid,b.brand),pid,brand:b.brand,qty:Math.floor(qty),price,moq});save();fm.reset();resetBrandSel($("#vBrand"));fm.hidden=true;$("#vErr").textContent="";renderVStock();return toast(`${pname(pid,b.brand)} listed. Shops can find it now.${brandNote(b)}`)}
+  if(fm.id==="brandForm"){const pid=fm.dataset.pid,vs=variantsOf(inventory,pid),p=vs[0],v=id=>$(id).value.trim(),price=Number(v("#bPrice")),cost=Number(v("#bCost"))||0,stock=Number(v("#bStock"));
+    const b=readBrand($("#bBrand"));if(b.err)return $("#bErr").textContent=b.err;
+    if(vs.some(x=>x.brand===b.brand))return $("#bErr").textContent=`You already stock ${b.brand}. Change its stock in the inventory table.`;
+    if(!(price>0))return $("#bErr").textContent="Enter a selling price above ₹0.";if(v("#bStock")===""||!(stock>=0))return $("#bErr").textContent="Enter the opening stock (0 is fine).";
+    keepBrand(b);const row={...clone(p),id:vid(pid,b.brand),pid,brand:b.brand,pn:(v("#bPn")||((sfx=>p.brand&&p.pn.endsWith(sfx)?p.pn.slice(0,-sfx.length):p.pn)("-"+slug(p.brand||"").slice(0,3).toUpperCase())+"-"+slug(b.brand).slice(0,3).toUpperCase())).toUpperCase(),price,cost,tiers:[],stock:Math.floor(stock),reorder:Number(v("#bReorder"))||5,rack:v("#bRack").toUpperCase()};
+    inventory.splice(inventory.lastIndexOf(vs[vs.length-1])+1,0,row);save();closeOverlay(true);renderInventory();renderChrome();return toast(`${full(row)} added. It shows on the counter under ${p.name}.${brandNote(b)}`)}
   if(fm.id==="addForm"){const v=id=>$(id).value.trim(),name=v("#fName"),price=Number(v("#fPrice")),cost=Number(v("#fCost"))||0,stock=Number(v("#fStock"));
     if(!name)return $("#formErr").textContent="Give the part a name.";if(!(price>0))return $("#formErr").textContent="Enter a selling price above ₹0.";
     if(v("#fStock")===""||!(stock>=0))return $("#formErr").textContent="Enter the opening stock (0 is fine).";
     const bm=Number(v("#fBulkMin")),bp=Number(v("#fBulkPrice"));if((bm||bp)&&!(bm>=2&&bp>0&&bp<price))return $("#formErr").textContent="Bulk price needs a quantity of 2 or more and a price below the selling price.";
-    inventory.unshift({id:"x"+Date.now(),name,fits:v("#fFits")||"Universal",pn:(v("#fPn")||("NP-"+String(inventory.length+1).padStart(4,"0"))).toUpperCase(),veh:v("#fVeh"),cat:v("#fCat"),hsn:v("#fHsn")||"8708",price,cost,rack:v("#fRack").toUpperCase(),tiers:bm?[{min:bm,price:bp}]:[],stock:Math.floor(stock),reorder:Number(v("#fReorder"))||5});
-    save();fm.reset();fm.hidden=true;$("#formErr").textContent="";renderInventory();renderChrome();return toast(`${name} added to inventory`)}
+    const b=readBrand($("#fBrand"));if(b.err)return $("#formErr").textContent=b.err;keepBrand(b);const pid="x"+Date.now();
+    inventory.unshift({id:vid(pid,b.brand),pid,brand:b.brand,name,fits:v("#fFits")||"Universal",pn:(v("#fPn")||("NP-"+String(inventory.length+1).padStart(4,"0"))).toUpperCase(),veh:v("#fVeh"),cat:v("#fCat"),hsn:v("#fHsn")||"8708",price,cost,rack:v("#fRack").toUpperCase(),tiers:bm?[{min:bm,price:bp}]:[],stock:Math.floor(stock),reorder:Number(v("#fReorder"))||5});
+    save();fm.reset();resetBrandSel($("#fBrand"));fm.hidden=true;$("#formErr").textContent="";renderInventory();renderChrome();return toast(`${b.brand} ${name} added to inventory.${brandNote(b)}`)}
 });
 $("#fCat").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("");
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",paintThemeBtns);
 
 /* ---------- boot ---------- */
-net=read("pd5.net")||seedNet();save();
+net=read("pd6.net")||seedNet();save();
 session=read("pd5.me");setMe();
 const start=(location.hash||"").slice(1);
-if(session){if(session.t==="shop"&&session.id==="s1"){cart=[{id:"of-swift",qty:12},{id:"sp-4w",qty:4},{id:"af-nexon",qty:1}];cartCust="c1"}show(start||"counter")}
+if(session){if(session.t==="shop"&&session.id==="s1"){demoCart()}show(start||"counter")}
 else show("login");
 })();
