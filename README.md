@@ -13,7 +13,7 @@ This is a front-end prototype. It runs entirely in the browser on demo data save
 - **Payment tiles:** Cash (works out change), UPI, Card, Khata (credit) and Split.
 - **Pick slip:** the parts-shop version of a kitchen ticket. Parts are sorted by rack so store staff can pull them in one walk.
 - **Bills:** history with a GST tax invoice, the amount in words, and copy-to-WhatsApp text.
-- **Customers:** garages, fleets and regulars, with khata due and payment recording.
+- **Customers:** garages, fleets and individuals, with khata due and payment recording.
 - **Inventory:** rack, cost, price, margin, reorder status and add-part.
 - **Reports:** sales by day, payments by mode, top parts, khata to collect and items to reorder.
 - **Find stock:** live supplier stock plus shops more than 3 km away.

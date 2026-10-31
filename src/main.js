@@ -40,8 +40,9 @@ const P={
  Credit:'<path d="M5 4h11a3 3 0 0 1 3 3v14H8a3 3 0 0 1-3-3z"/><path d="M5 18a3 3 0 0 1 3-3h11M9 8h6"/>',
  Split:'<path d="M12 21v-7l-6-6M12 14l6-6M6 3v5h5M18 3v5h-5"/>',
  slip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h4.5"/>',
- car:'<path d="M5 17H3.5v-3.5L6 9h9l4 4.5h1.5V17H19"/><path d="M9 17h6M6 13.5h13"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>',
- bike:'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M8 17h6l2.5-5"/><path d="M3 12h6l2 2h3.5"/><path d="m19 17-3-7h-2.5"/><path d="M16 10h2.5"/>',
+ // car and bike: Tabler Icons (MIT, tabler.io/icons) "car" and "motorbike"
+ car:'<path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5"/>',
+ bike:'<path d="M5 16m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M19 16m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7.5 14h5l4 -4h-10.5m1.5 4l4 -4"/><path d="M13 6h2l1.5 3l2 4"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
  x:'<path d="M6 6l12 12M18 6 6 18"/>',
  check:'<path d="m5 12 5 5L20 7"/>',
@@ -49,7 +50,7 @@ const P={
 };
 // Vehicle on a card: a small car and/or bike icon; the words are in title and the card label for screen readers.
 const VEHW={"2W":"Two-wheeler","4W":"Four-wheeler",Both:"Two-wheeler and four-wheeler"};
-const vehIc=v=>`<span class="veh veh-ic" title="${VEHW[v]||""}">${v!=="4W"?ic("bike",1.7):""}${v!=="2W"?ic("car",1.7):""}</span>`;
+const vehIc=v=>`<span class="veh veh-ic" title="${VEHW[v]||""}">${v!=="4W"?ic("bike"):""}${v!=="2W"?ic("car"):""}</span>`;
 const ic=(k,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||1.8}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]||P.Engine}</svg>`;
 
 /* ---------- catalogue: name, fits, pn, veh, cat, hsn, price, tiers, cost ---------- */
@@ -166,8 +167,8 @@ const VENDORS0=[
 ];
 // Extra brands some suppliers carry for a part they already list: [pid, brand, qty, price, moq].
 const VENDOR_EXTRA={v1:[["eo-5w30","Servo",90,1690,6],["eo-10w30","Castrol",200,355,12]],v4:[["bt-35","Exide",30,4250,2],["sp-2w","NGK",600,96,50]]};
-const CTYPES=["Retail","Mechanic / garage","Fleet / business"];
-const WALKIN={id:"walkin",name:"Walk-in customer",type:"Retail",phone:"",gstin:"",due:0};
+const CTYPES=["Individual","Mechanic / garage","Fleet / business"];
+const WALKIN={id:"walkin",name:"Walk-in customer",type:"Individual",phone:"",gstin:"",due:0};
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -255,7 +256,7 @@ function seedNet(){
     {id:"c2",name:"Shree Ganesh Cabs",type:"Fleet / business",phone:"+91 90000 00302",gstin:"27AAKFS5521M1ZQ",due:38650},
     {id:"c3",name:"Patel Transport Co.",type:"Fleet / business",phone:"+91 90000 00303",gstin:"27AACFP7712N1Z3",due:0},
     {id:"c4",name:"Imtiaz Two-Wheeler Works",type:"Mechanic / garage",phone:"+91 90000 00304",gstin:"",due:4300},
-    {id:"c5",name:"Anil Deshmukh",type:"Retail",phone:"+91 90000 00305",gstin:"",due:0}];
+    {id:"c5",name:"Anil Deshmukh",type:"Individual",phone:"+91 90000 00305",gstin:"",due:0}];
   // sample bills across the last 7 days
   let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646};
   const custPick=["walkin","walkin","walkin","c1","c2","c4","c5","c3"],modes=["Cash","Cash","UPI","UPI","UPI","Card","Credit"];
@@ -265,7 +266,7 @@ function seedNet(){
       const d=new Date(now-day*864e5);d.setHours(10+Math.floor(rnd()*9),Math.floor(rnd()*60),0,0);if(d>new Date(now))d.setTime(now-(k+1)*40*6e4);
       const cid=custPick[Math.floor(rnd()*custPick.length)];const c=cid==="walkin"?WALKIN:s1.customers.find(x=>x.id===cid);
       const lines=[];const nl=1+Math.floor(rnd()*3);
-      for(let j=0;j<nl;j++){const pool=s1.inventory.filter(x=>x.price<7000&&x.pid!=="eo-5w30"),p=pool[Math.floor(rnd()*pool.length)];if(lines.find(l=>l.id===p.id))continue;const bulk=c.type!=="Retail"&&rnd()>.5;lines.push({id:p.id,qty:bulk?10+Math.floor(rnd()*15):1+Math.floor(rnd()*3)})}
+      for(let j=0;j<nl;j++){const pool=s1.inventory.filter(x=>x.price<7000&&x.pid!=="eo-5w30"),p=pool[Math.floor(rnd()*pool.length)];if(lines.find(l=>l.id===p.id))continue;const bulk=c.type!=="Individual"&&rnd()>.5;lines.push({id:p.id,qty:bulk?10+Math.floor(rnd()*15):1+Math.floor(rnd()*3)})}
       let mode=modes[Math.floor(rnd()*modes.length)];if(mode==="Credit"&&cid==="walkin")mode="Cash";
       const disc=c.type==="Fleet / business"?{type:"pct",value:3}:{type:"pct",value:0};
       const cc=compute(lines,disc,s1.inventory);n++;
@@ -488,7 +489,7 @@ function openNewCust(then){
 }
 function renderCustomers(){
   const list=me.customers,due=list.reduce((a,c)=>a+c.due,0),owing=list.filter(c=>c.due>0).length;
-  $("#custSub").textContent="Garages, fleets and regulars. Khata due is what they owe you on credit bills.";
+  $("#custSub").textContent="Garages, fleets and individuals. Khata due is what they owe you on credit bills.";
   $("#custStats").innerHTML=`<div class="stat hi"><span class="label">Total khata due</span><b>${money0(due)}</b><small>${owing} customer${owing!==1?"s":""} owe you</small></div>
     <div class="stat"><span class="label">Customers</span><b>${list.length}</b></div>
     <div class="stat"><span class="label">Garages</span><b>${list.filter(c=>c.type==="Mechanic / garage").length}</b></div>
@@ -894,7 +895,9 @@ $("#fCat").innerHTML=CATS.map(c=>`<option>${c}</option>`).join("");
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",paintThemeBtns);
 
 /* ---------- boot ---------- */
-net=read("pd6.net")||seedNet();save();
+net=read("pd6.net")||seedNet();
+// Saved data from before "Retail" was renamed "Individual".
+net.shops.forEach(s=>[...(s.customers||[]),...(s.bills||[]).map(b=>b.customer)].forEach(c=>{if(c&&c.type==="Retail")c.type="Individual"}));save();
 session=read("pd5.me");setMe();
 const start=(location.hash||"").slice(1);
 if(session){if(session.t==="shop"&&session.id==="s1"){demoCart()}show(start||"counter")}

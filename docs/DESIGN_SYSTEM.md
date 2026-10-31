@@ -18,6 +18,7 @@ All tokens live at the top of `src/styles.css`. **Never hard-code a colour in a 
 | `--line-strong` | `#cfd3da` | `#3b3b42` | Input and control borders |
 | `--accent` | `#c0f63b` | `#c0f63b` | **Actions, selected state, highlights only** (brief: Secondary) |
 | `--on-accent` | `#000000` | `#000000` | Text on accent |
+| `--accent-ink` | `#3f6212` | `#c0f63b` | Accent as text on `--surface`; plain lime is unreadable on white |
 | `--steel` | `#7155e6` | `#a893f7` | Bulk pricing, network hints (brief: slate-blue) |
 | `--ok / --warn / --bad` | green / amber / red | lighter versions | Stock and status only, always with a label |
 | `--side-bg` | `#0b0b0c` | `#050506` | Sidebar (dark in both themes) |
