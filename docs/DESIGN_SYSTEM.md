@@ -68,7 +68,7 @@ Every icon in the sidebar has a visible text label, even when the sidebar collap
 
 - **Part tile:** category icon area with a vehicle badge (2W / 4W), name, fits line, a stock dot with count, and the price in Saira. A selected tile gets a 2px ink inset border and a lime quantity badge. An out-of-stock tile is dimmed and opens Find stock.
 - **Bill line:** name; struck-through list price when a bulk rate applies; part number; per-unit price; a purple bulk hint; stepper, +10, remove.
-- **Payment tile:** amount on top (Saira 21px), mode icon and uppercase label below. The pick slip tile is lime.
+- **Payment tile:** amount on top (Saira 21px), mode icon and uppercase label below. The selected tile gets a lime edge, soft tint and a tick. The Generate bill tile is solid lime and sits last on the right.
 - **Status pill:** `st-ok`, `st-low`, `st-out`, `st-wait`, `st-need` (ink, means "your turn"), `st-shared` (lime).
 - **Phone reveal:** ink-bordered box with a lime tint and a mono number, `user-select: all`.
 - **Tables:** 12.5px uppercase headers; 15.5px cells; low-stock rows tinted amber.

@@ -17,7 +17,6 @@ A point-of-sale and stock network for auto-parts shops. Shops bill customers at 
 |---|---|---|---|
 | Shop owner | 35–65 | Counter tablet or desktop, phone | Fast billing, khata, knowing what's running out, finding stock |
 | Counter staff | 20–45 | Counter tablet | Tap-to-bill, quantities, payment |
-| Store-room staff | 20–50 | Printed or on-screen pick slip | Which part, which rack, how many |
 | Vendor / distributor | 30–60 | Desktop, phone | Keep stock current, answer shop requests |
 
 Many users are 40–60+. **Large type, large touch targets and plain words are requirements, not polish.** See DESIGN_SYSTEM.md.
@@ -27,7 +26,7 @@ Many users are 40–60+. **Large type, large touch targets and plain words are r
 ### Shop
 | Screen | Purpose |
 |---|---|
-| New sale | POS: tap parts → bill → pick slip → payment → invoice |
+| New sale | POS: tap parts → bill → choose payment → Generate bill → invoice |
 | Bills | History of bills, reopen an invoice |
 | Customers | Garages, fleets and individuals; khata (credit) due; record payments |
 | Inventory | Stock, rack, cost, price, margin, reorder level; add parts |
@@ -48,8 +47,8 @@ Many users are 40–60+. **Large type, large touch targets and plain words are r
 1. Staff tap part tiles. Each tap adds 1. Quantity can be typed, or +10 tapped for bulk.
 2. Bulk tiers apply automatically (e.g. 20+ at ₹232). The bill shows "N more for ₹X each".
 3. Optional: choose a customer (needed for khata), add a discount (% or ₹ flat).
-4. Optional: **Pick slip** → the store room gets the parts list sorted by rack.
-5. Tap a payment tile: Cash / UPI / Card / Khata / Split. A confirm step follows (change due, khata balance, split totals).
+4. Choose a payment tile: Cash / UPI / Card / Khata. Cash is selected to start.
+5. Tap **Generate bill**. A confirm step follows (change due, khata balance).
 6. Sale completes → stock is deducted → GST tax invoice opens → **Next sale**.
 
 ### 2. Restock from the network
@@ -79,7 +78,6 @@ Many users are 40–60+. **Large type, large touch targets and plain words are r
 | Say | Not |
 |---|---|
 | Khata | Accounts receivable, credit ledger |
-| Pick slip | KOT, fulfilment ticket |
 | Part, part number | SKU, item code |
 | Supplier / vendor | Upstream partner |
 | Rack (R2-B4) | Bin location |
