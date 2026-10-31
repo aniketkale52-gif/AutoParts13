@@ -39,7 +39,6 @@ const P={
  Card:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/>',
  Credit:'<path d="M5 4h11a3 3 0 0 1 3 3v14H8a3 3 0 0 1-3-3z"/><path d="M5 18a3 3 0 0 1 3-3h11M9 8h6"/>',
  Split:'<path d="M12 21v-7l-6-6M12 14l6-6M6 3v5h5M18 3v5h-5"/>',
- slip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9zM8.5 11h7M8.5 15h4.5"/>',
  // car and bike: Tabler Icons (MIT, tabler.io/icons) "car" and "motorbike"
  car:'<path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M5 17h-2v-6l2 -5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5"/>',
  bike:'<path d="M5 16m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M19 16m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7.5 14h5l4 -4h-10.5m1.5 4l4 -4"/><path d="M13 6h2l1.5 3l2 4"/>',
@@ -208,7 +207,7 @@ const savedTheme=read("pd.theme");if(savedTheme)document.documentElement.dataset
 
 /* ---------- state ---------- */
 let net,session,me,inventory=[],bills=[];
-let cart=[],cartCust="walkin",discount={type:"pct",value:0},slipSent=null;
+let cart=[],cartCust="walkin",discount={type:"pct",value:0},payMode="Cash";
 const f={q:"",veh:"all",cat:"All",brand:""},inv={q:"",low:false},find={q:"",pid:null};
 let dealTab="received",vq="",range="7",current="login";
 const acct=ref=>ref.t==="shop"?net.shops.find(s=>s.id===ref.id):net.vendors.find(v=>v.id===ref.id);
@@ -249,7 +248,7 @@ function seedNet(){
         const use=set.length>=3?set.filter((b,j)=>j!==i%set.length):set;
         return use.map((b,j)=>mk(p,b,j?Math.round(st*(j===1?.6:.4)):st,j?Math.max(1,Math.round(ro/2)):ro,r))})
       :CATALOG.filter(p=>p.id in s.stock).map(p=>{const set=bset(p.id);return mk(p,set[si%set.length],s.stock[p.id],Math.max(2,Math.round(s.stock[p.id]*.2)),RACKS[p.cat]+"-B"+(1+(rack++%6)))});
-    delete o.stock;o.bills=[];o.customers=[];o.slipSeq=0;return o});
+    delete o.stock;o.bills=[];o.customers=[];return o});
   const s1=shops[0];
   s1.customers=[
     {id:"c1",name:"Raju Motor Garage",type:"Mechanic / garage",phone:"+91 90000 00301",gstin:"",due:12400},
@@ -302,7 +301,7 @@ function demoCart(){const first=pid=>variantsOf(inventory,pid).find(p=>p.stock>0
 function setMe(){
   me=session?acct(session):null;if(!me)session=null;
   if(session&&session.t==="shop"){inventory=me.inventory;bills=me.bills}else{inventory=[];bills=[]}
-  cart=[];cartCust="walkin";discount={type:"pct",value:0};slipSent=null;find.pid=null;find.q="";f.q="";$("#fq").value="";$("#q").value="";$("#discVal").value=0;
+  cart=[];cartCust="walkin";discount={type:"pct",value:0};payMode="Cash";find.pid=null;find.q="";f.q="";$("#fq").value="";$("#q").value="";$("#discVal").value=0;
 }
 function login(t,id){session={t,id};store("pd5.me",session);setMe();
   if(t==="shop"&&id==="s1"){demoCart()}
@@ -385,19 +384,18 @@ function updatePick(){const rows=pickRows(),on=rows.filter(r=>r.qty>0),units=on.
   rows.forEach(r=>r.i.closest(".src-row").classList.toggle("on",r.qty>0));
   $("#pickSum").innerHTML=units?`<span>${on.map(r=>r.qty+" × "+esc(r.v.brand||"No brand")).join(" + ")}</span><b>${units} unit${units>1?"s":""} · ${money0(r2(amt))}</b>`:`<span class="faint">Use + to choose how many of each brand.</span>`;$("#pickErr").textContent=""}
 function setQty(id,qty){const p=inventory.find(x=>x.id===id),line=cart.find(l=>l.id===id);if(!line)return;qty=Math.floor(Number(qty)||0);
-  if(qty<=0)cart=cart.filter(l=>l.id!==id);else if(qty>p.stock){line.qty=p.stock;toast(`Only ${p.stock} of ${full(p)} in stock`)}else line.qty=qty;slipSent=null;renderCounter()}
+  if(qty<=0)cart=cart.filter(l=>l.id!==id);else if(qty>p.stock){line.qty=p.stock;toast(`Only ${p.stock} of ${full(p)} in stock`)}else line.qty=qty;renderCounter()}
 function addToCart(id,n=1){const p=inventory.find(x=>x.id===id);if(!p||p.stock<=0)return;const line=cart.find(l=>l.id===id);
-  if(line)setQty(id,line.qty+n);else{cart.push({id,qty:Math.min(n,p.stock)});slipSent=null;renderCounter()}}
+  if(line)setQty(id,line.qty+n);else{cart.push({id,qty:Math.min(n,p.stock)});renderCounter()}}
 const billNo=()=>me.prefix+"/"+fy(new Date())+"/"+String(bills.length+1).padStart(4,"0");
-const PAYMODES=[["Cash","Cash"],["UPI","UPI"],["Card","Card"],["Credit","Khata"],["Split","Split"]];
-function payTiles(c){const cu=getCust(cartCust),dis=!cart.length;
-  return `<button class="pay-tile pick" id="pickBtn" ${dis?"disabled":""}><span class="pl">${ic("slip",2)}Pick slip</span><small>${slipSent?"Sent · "+slipSent:"Send to store room"}</small></button>`+
-    PAYMODES.map(([m,l])=>`<button class="pay-tile" data-paymode="${m}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="amt">${money0(c.total)}</span><span class="pl">${ic(m,2)}${l}</span></button>`).join("")}
+const PAYMODES=[["Cash","Cash"],["UPI","UPI"],["Card","Card"],["Credit","Khata"]];
+function payTiles(c){const cu=getCust(cartCust),dis=!cart.length,lbl=PAYMODES.find(([m])=>m===payMode)[1];
+  return PAYMODES.map(([m,l])=>{const sel=m===payMode;return `<button class="pay-tile${sel?" sel":""}" data-paymode="${m}" aria-pressed="${sel}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="amt">${money0(c.total)}</span><span class="pl">${ic(sel?"check":m,sel?2.4:2)}${l}</span></button>`}).join("")+
+    `<button class="pay-tile pick" id="genBill" ${dis?"disabled":""}><span class="pl">${ic("check",2.4)}Generate bill</span><small>Paying by ${lbl}</small></button>`}
 function renderCart(){
   const c=compute(cart,discount),cu=getCust(cartCust);
   $("#pickCust").innerHTML=`<span class="avatar">${cu.id==="walkin"?ic("customers"):esc(initials(cu.name))}</span><span style="min-width:0"><b>${esc(cu.name)}</b><small>${esc(cu.type)}${cu.due>0?` · <span class="due">Khata due ${money0(cu.due)}</span>`:cu.gstin?` · GSTIN ${esc(cu.gstin)}`:""}</small></span><span class="chg">${cu.id==="walkin"?"Choose":"Change"}</span>`;
   $("#itemsLabel").textContent=cart.length?`Items in bill · ${c.units} units`:"Items in bill";
-  $("#slipOn").innerHTML=slipSent?`<div class="slip-on">${ic("check",2.4)}Pick slip ${esc(slipSent)} sent to store room</div>`:"";
   $("#lines").innerHTML=cart.length?c.items.map(i=>{const p=inventory.find(x=>x.id===i.id),nt=nextTier(p,i.qty),bulk=i.rate<p.price;
     return `<li class="line"><div class="line-top"><span class="line-name">${esc(i.name)}</span><span class="line-price">${bulk?`<s>${money(i.list*i.qty)}</s>`:""}<b>${money(i.amount)}</b></span></div>
       <div class="line-sub"><span class="mono">${esc(i.pn)}</span><span>${money0(i.rate)} each</span>${bulk?`<span class="bulk-on">Bulk rate, saves ${money0((i.list-i.rate)*i.qty)}</span>`:""}${nt?`<span class="bulk-on">${nt.min-i.qty} more for ${money0(nt.price)} each</span>`:""}</div>
@@ -429,11 +427,8 @@ function openPay(mode){
       <div class="change" id="pChange"><span>Change to return</span><b>₹0</b></div>`}
   else if(mode==="UPI")body=`<p class="muted" style="margin:0">Ask the customer to scan your shop's UPI QR and pay the amount above. Complete the sale once the payment shows on your phone.</p><div class="field"><label for="pRef">UPI reference no. (optional)</label><input class="input mono" id="pRef" inputmode="numeric" placeholder="12-digit UTR"></div>`;
   else if(mode==="Card")body=`<p class="muted" style="margin:0">Run the amount on your card machine. Complete the sale once the machine prints “approved”.</p><div class="field"><label for="pRef">Card last 4 digits (optional)</label><input class="input mono" id="pRef" inputmode="numeric" maxlength="4" placeholder="1234"></div>`;
-  else if(mode==="Credit")body=`<div class="notice">${ic("Credit")}<span>This bill goes on <b style="color:var(--ink)">${esc(cu.name)}</b>'s khata. Their due goes from ${money0(cu.due)} to <b style="color:var(--ink)">${money0(cu.due+T)}</b>.</span></div>`;
-  else if(mode==="Split")body=`<p class="muted" style="margin:0">Enter how much is paid each way. The amounts must add up to the total.</p>
-      ${["Cash","UPI","Card","Credit"].map(m=>`<div class="split-row"><label for="sp-${m}">${ic(m)}${m==="Credit"?"Khata":m}</label><input class="input num" id="sp-${m}" data-split="${m}" type="number" min="0" step="1" value="${m==="Cash"?T:0}" ${m==="Credit"&&cu.id==="walkin"?'disabled title="Choose a customer first"':""}></div>`).join("")}
-      <div class="change" id="pChange"><span>Left to collect</span><b>₹0</b></div>`;
-  const title={Cash:"Collect cash",UPI:"Collect by UPI",Card:"Collect by card",Credit:"Put on khata",Split:"Split payment"}[mode];
+  else body=`<div class="notice">${ic("Credit")}<span>This bill goes on <b style="color:var(--ink)">${esc(cu.name)}</b>'s khata. Their due goes from ${money0(cu.due)} to <b style="color:var(--ink)">${money0(cu.due+T)}</b>.</span></div>`;
+  const title={Cash:"Collect cash",UPI:"Collect by UPI",Card:"Collect by card",Credit:"Put on khata"}[mode];
   openOverlay(`<form class="modal" id="payForm" data-mode="${mode}" novalidate>
     <div class="modal-head"><div><span class="label">${esc(cu.name)} · ${c.units} units</span><h2>${title}</h2></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
     <div><span class="label">Total due</span><div class="bigdue">${money0(T)}</div></div>${body}
@@ -443,28 +438,15 @@ function openPay(mode){
 }
 function updatePay(){const fm=$("#payForm");if(!fm)return;const T=compute(cart,discount).total,m=fm.dataset.mode;
   if(m==="Cash"){const r=Number($("#pRecv").value)||0;$("#pChange").innerHTML=r>=T?`<span>Change to return</span><b>${money0(r-T)}</b>`:`<span>Still short by</span><b style="color:var(--bad)">${money0(T-r)}</b>`;$("#paySubmit").disabled=r<T}
-  if(m==="Split"){const s=[...fm.querySelectorAll("[data-split]")].reduce((a,i)=>a+(Number(i.value)||0),0),left=r2(T-s);
-    $("#pChange").innerHTML=left===0?`<span>Fully collected</span><b style="color:var(--ok)">₹0</b>`:left>0?`<span>Left to collect</span><b>${money0(left)}</b>`:`<span>Over by</span><b style="color:var(--bad)">${money0(-left)}</b>`;$("#paySubmit").disabled=left!==0}
 }
 function completeSale(mode,parts,ref){
   const d=new Date(),c=compute(cart,discount),cu=getCust(cartCust);
-  const bill={no:billNo(),date:d.toISOString(),customer:{id:cu.id,name:cu.name,type:cu.type,phone:cu.phone,gstin:cu.gstin},payment:mode,payParts:parts,ref:ref||"",discount:{...discount},slip:slipSent,...c};
+  const bill={no:billNo(),date:d.toISOString(),customer:{id:cu.id,name:cu.name,type:cu.type,phone:cu.phone,gstin:cu.gstin},payment:mode,payParts:parts,ref:ref||"",discount:{...discount},...c};
   bill.items.forEach(i=>{const p=inventory.find(x=>x.id===i.id);if(p)p.stock=Math.max(0,p.stock-i.qty)});
   const credit=parts.filter(p=>p.mode==="Credit").reduce((a,p)=>a+p.amount,0);if(credit>0&&cu.id!=="walkin")cu.due=r2(cu.due+credit);
   bills.push(bill);save();
-  cart=[];cartCust="walkin";discount={type:"pct",value:0};slipSent=null;$("#discVal").value=0;setPressed("#discSeg","pct","dtype");
+  cart=[];cartCust="walkin";discount={type:"pct",value:0};payMode="Cash";$("#discVal").value=0;setPressed("#discSeg","pct","dtype");
   closeSheet();closeOverlay(true);renderCounter();renderChrome();showInvoice(bill,true);
-}
-
-/* pick slip */
-function openSlip(){
-  if(!cart.length)return;const no=slipSent||"PS-"+String((me.slipSeq||0)+1).padStart(4,"0");
-  const items=cart.map(l=>({...inventory.find(x=>x.id===l.id),qty:l.qty})).sort((a,b)=>(a.rack||"").localeCompare(b.rack||""));
-  openOverlay(`<div class="modal"><div class="modal-head"><div><span class="label">Pick slip · ${esc(no)}</span><h2>Parts to pull from the store room</h2></div><button type="button" class="icon-btn" data-close aria-label="Close">${ic("x",2)}</button></div>
-    <p class="muted" style="margin:0">Sorted by rack so staff can walk the store room once. Tick each part as it reaches the counter.</p>
-    <ul class="slip" style="list-style:none;margin:0;padding:0">${items.map(p=>`<li><span class="rack">${esc(p.rack||"—")}</span><div><b style="font-weight:600">${esc(full(p))}</b><div class="faint small">${esc(p.fits)} · <span class="mono">${esc(p.pn)}</span></div></div>
-      <label style="display:flex;align-items:center;gap:12px"><span class="q">×${p.qty}</span><input type="checkbox" aria-label="Picked ${esc(full(p))}"></label></li>`).join("")}</ul>
-    <div class="form-actions"><button class="btn btn-primary" id="sendSlip" data-no="${esc(no)}">${slipSent?"Done":"Send to store room"}</button><button class="btn btn-secondary btn-sm" id="copySlip">Copy slip text</button><button type="button" class="btn-link" data-close>Cancel</button></div></div>`,"Pick slip");
 }
 
 /* customers */
@@ -753,7 +735,7 @@ function show(view){
   closeSide();rerender();$("#content").scrollTop=0;
   try{history.replaceState(null,"","#"+view)}catch(e){}
 }
-function openOverlay(html,label){const ov=$("#overlay");ov.innerHTML=html;ov.setAttribute("aria-label",label);ov.hidden=false;const fx=ov.querySelector("input:not([type=checkbox]),textarea,#newSale,#sendSlip,[data-close]");if(fx)fx.focus()}
+function openOverlay(html,label){const ov=$("#overlay");ov.innerHTML=html;ov.setAttribute("aria-label",label);ov.hidden=false;const fx=ov.querySelector("input:not([type=checkbox]),textarea,#newSale,[data-close]");if(fx)fx.focus()}
 function closeOverlay(silent){$("#overlay").hidden=true;$("#overlay").innerHTML="";openBill=null;if(!silent)rerender()}
 function openSheet(){$("#cart").classList.add("open");$("#sheetScrim").hidden=false}
 function closeSheet(){$("#cart").classList.remove("open");$("#sheetScrim").hidden=true}
@@ -778,9 +760,9 @@ document.addEventListener("click",e=>{
   if(ds.inc)return setQty(ds.inc,cart.find(x=>x.id===ds.inc).qty+1);
   if(ds.dec)return setQty(ds.dec,cart.find(x=>x.id===ds.dec).qty-1);
   if(ds.add10)return setQty(ds.add10,cart.find(x=>x.id===ds.add10).qty+10);
-  if(ds.remove){cart=cart.filter(l=>l.id!==ds.remove);slipSent=null;return renderCounter()}
+  if(ds.remove){cart=cart.filter(l=>l.id!==ds.remove);return renderCounter()}
   if(ds.dtype){discount.type=ds.dtype;setPressed("#discSeg",ds.dtype,"dtype");return renderCart()}
-  if(ds.paymode){if(!cart.length)return toast("Add parts to the bill first.");return openPay(ds.paymode)}
+  if(ds.paymode){payMode=ds.paymode;const box=t.parentElement.id;renderCart();return $(`#${box} [data-paymode="${payMode}"]`).focus()}
   if(ds.recv){$("#pRecv").value=ds.recv;return updatePay()}
   if(ds.setcust){const then=$("#custList").dataset.then;cartCust=ds.setcust;closeOverlay(true);renderCart();if(then&&cartCust!=="walkin")return openPay(then);return}
   if(ds.newcust!==undefined)return openNewCust(ds.newcust);
@@ -801,10 +783,8 @@ document.addEventListener("click",e=>{
     case "menuBtn":$("#side").classList.add("open");$("#sideScrim").hidden=false;return;
     case "acctBtn":return logout();
     case "pickCust":return openCustPicker();
-    case "pickBtn":return openSlip();
-    case "sendSlip":{if(!slipSent){me.slipSeq=(me.slipSeq||0)+1;slipSent=t.dataset.no;save();toast(`Pick slip ${slipSent} sent to the store room`)}closeOverlay(true);return renderCart()}
-    case "copySlip":{const txt=["PICK SLIP "+(slipSent||""),...cart.map(l=>{const p=inventory.find(x=>x.id===l.id);return `${p.rack||"-"}  ${l.qty} x ${full(p)} [${p.pn}]`})].join("\n");return copy(txt,"Slip copied",()=>toast("Copy blocked here."))}
-    case "clearCart":cart=[];slipSent=null;cartCust="walkin";return renderCounter();
+    case "genBill":{if(!cart.length)return toast("Add parts to the bill first.");return openPay(payMode)}
+    case "clearCart":cart=[];payMode="Cash";cartCust="walkin";return renderCounter();
     case "openCart":return openSheet();
     case "closeCart":return closeSheet();
     case "newSale":closeOverlay(true);return show("counter");
@@ -852,12 +832,10 @@ document.addEventListener("submit",e=>{
     if(!rows.some(r=>r.qty!==r.was))return rows.some(r=>r.qty)?(closeOverlay(true),renderCounter()):$("#pickErr").textContent="Choose how many of at least one brand, or tap Cancel.";
     const over=pickRows().filter(r=>(Number(r.i.value)||0)>r.v.stock);
     rows.forEach(({v,qty})=>{const line=cart.find(l=>l.id===v.id);if(qty<=0)cart=cart.filter(l=>l.id!==v.id);else if(line)line.qty=qty;else cart.push({id:v.id,qty})});
-    slipSent=null;closeOverlay(true);renderCounter();
+    closeOverlay(true);renderCounter();
     const on=rows.filter(r=>r.qty>0);return toast(over.length?`Only ${over.map(r=>r.v.stock+" "+r.v.brand).join(", ")} in stock, so the bill has that many.`:on.length?"Bill updated: "+on.map(r=>r.qty+" × "+(r.v.brand||r.v.name)).join(", "):"Removed from the bill")}
   if(fm.id==="payForm"){const m=fm.dataset.mode,T=compute(cart,discount).total;
     if(m==="Cash"){const r=Number($("#pRecv").value)||0;if(r<T)return $("#pErr").textContent="Cash received is less than the total.";return completeSale("Cash",[{mode:"Cash",amount:T}],r>T?"Change "+money0(r-T):"")}
-    if(m==="Split"){const parts=[...fm.querySelectorAll("[data-split]")].map(i=>({mode:i.dataset.split,amount:Number(i.value)||0}));if(r2(parts.reduce((a,p)=>a+p.amount,0))!==T)return $("#pErr").textContent="The amounts must add up to the total.";
-      const used=parts.filter(p=>p.amount>0);return completeSale(used.length===1?used[0].mode:"Split",parts,"")}
     return completeSale(m,[{mode:m,amount:T}],($("#pRef")||{}).value||"")}
   if(fm.id==="custForm"){const name=$("#ncName").value.trim();if(!name)return $("#ncErr").textContent="Enter the customer's name.";
     const c={id:"c"+Date.now(),name,type:$("#ncType").value,phone:$("#ncPhone").value.trim(),gstin:$("#ncGst").value.trim().toUpperCase(),due:0};me.customers.push(c);save();

@@ -10,8 +10,7 @@ This is a front-end prototype. It runs entirely in the browser on demo data save
 
 **Shop owner app**
 - **New sale (POS):** a tap grid of parts with category tabs and a two-wheeler / four-wheeler filter. The bill sits on the right. Bulk rates apply automatically, and discounts can be a percentage or a flat amount, with GST.
-- **Payment tiles:** Cash (works out change), UPI, Card, Khata (credit) and Split.
-- **Pick slip:** the parts-shop version of a kitchen ticket. Parts are sorted by rack so store staff can pull them in one walk.
+- **Payment tiles:** choose Cash (works out change), UPI, Card or Khata (credit), then tap Generate bill.
 - **Bills:** history with a GST tax invoice, the amount in words, and copy-to-WhatsApp text.
 - **Customers:** garages, fleets and individuals, with khata due and payment recording.
 - **Inventory:** rack, cost, price, margin, reorder status and add-part.

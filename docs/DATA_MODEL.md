@@ -30,7 +30,6 @@ In production, add `oem_numbers[]`, `gst_rate`, `image_url`, and a proper vehicl
   "inventory": [ /* shop stock item */ ],
   "customers": [ /* customer */ ],
   "bills": [ /* bill */ ],
-  "slipSeq": 0
 }
 ```
 In production add `logo_url`, `brand_color`, `plan`, `branches[]`, `staff[]` (role: owner | cashier | store).
@@ -66,11 +65,10 @@ A part a shop adds itself has `pid` like `x1730000000000`.
   "no": "SAS/26-27/0021",
   "date": "2026-10-28T11:20:00.000Z",
   "customer": { "id": "c1", "name": "…", "type": "…", "phone": "…", "gstin": "…" },
-  "payment": "Split",                       // Cash | UPI | Card | Credit | Split
-  "payParts": [{ "mode": "Cash", "amount": 5000 }, { "mode": "Credit", "amount": 10871 }],
+  "payment": "Cash",                        // Cash | UPI | Card | Credit (older bills may be Split)
+  "payParts": [{ "mode": "Cash", "amount": 15871 }],
   "ref": "UTR / last 4 / change given",
   "discount": { "type": "pct", "value": 3 },   // pct | amt
-  "slip": "PS-0004",
   "items": [{ "id": "of-swift--bosch", "pid": "of-swift", "brand": "Bosch", "name": "Bosch Engine oil filter", "pn": "…", "hsn": "8421", "cat": "Filters", "qty": 12, "list": 260, "cost": 188, "rate": 260, "amount": 3120 }],
   "subtotal": 0, "bulkSave": 0, "disc": 0, "taxable": 0, "cgst": 0, "sgst": 0, "roundoff": 0, "total": 0, "units": 0
 }
