@@ -58,7 +58,7 @@ A part a shop adds itself has `pid` like `x1730000000000`.
 ```json
 { "id": "c1", "name": "Raju Motor Garage", "type": "Mechanic / garage", "phone": "+91 …", "gstin": "", "due": 12400 }
 ```
-`type`: "Retail" | "Mechanic / garage" | "Fleet / business". `due` is the khata balance. In production, keep a `khata_entries` ledger (bill credit +, payment −) and derive `due` from it.
+`type`: "Individual" | "Mechanic / garage" | "Fleet / business". `due` is the khata balance. In production, keep a `khata_entries` ledger (bill credit +, payment −) and derive `due` from it.
 
 ## Bill
 ```json

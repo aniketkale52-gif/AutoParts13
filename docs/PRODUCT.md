@@ -29,7 +29,7 @@ Many users are 40–60+. **Large type, large touch targets and plain words are r
 |---|---|
 | New sale | POS: tap parts → bill → pick slip → payment → invoice |
 | Bills | History of bills, reopen an invoice |
-| Customers | Garages, fleets and retail regulars; khata (credit) due; record payments |
+| Customers | Garages, fleets and individuals; khata (credit) due; record payments |
 | Inventory | Stock, rack, cost, price, margin, reorder level; add parts |
 | Reports | Sales by day, payment modes, top parts, khata to collect, reorder list |
 | Find stock | Search a part, see suppliers (exact stock) and shops >3 km away |

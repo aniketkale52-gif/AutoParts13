@@ -3,7 +3,7 @@
 :root{
   --bg:#f4f5f7; --surface:#ffffff; --raised:#f1f2f4; --ink:#000000; --muted:#374151; --faint:#5b6370;
   --line:#e5e7eb; --line-strong:#cfd3da;
-  --accent:#c0f63b; --on-accent:#000000;
+  --accent:#c0f63b; --on-accent:#000000; --accent-ink:#3f6212;
   --steel:#7155e6; --steel-soft:#efebfd;
   --ok:#15803d; --warn:#b45309; --bad:#b91c1c; --ok-soft:#dcfce7; --warn-soft:#fef3c7; --bad-soft:#fee2e2;
   --scrim:rgba(0,0,0,.5); --shadow:0 1px 2px rgba(0,0,0,.05),0 12px 32px rgba(0,0,0,.12);
@@ -17,14 +17,14 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0d0d0f; --surface:#17171a; --raised:#222226; --ink:#fafafa; --muted:#cfcfd6; --faint:#a3a3ad;
-  --line:#2b2b30; --line-strong:#3b3b42; --accent:#c0f63b; --on-accent:#000000; --steel:#a893f7; --steel-soft:#262040;
+  --line:#2b2b30; --line-strong:#3b3b42; --accent:#c0f63b; --on-accent:#000000; --accent-ink:#c0f63b; --steel:#a893f7; --steel-soft:#262040;
   --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --ok-soft:#10291a; --warn-soft:#2c210b; --bad-soft:#301414;
   --scrim:rgba(0,0,0,.66); --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.55);
   --side-bg:#050506; --side-ink:#f4f4f5; --side-muted:#a7a7b0; --side-hover:#18181b;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0d0d0f; --surface:#17171a; --raised:#222226; --ink:#fafafa; --muted:#cfcfd6; --faint:#a3a3ad;
-  --line:#2b2b30; --line-strong:#3b3b42; --accent:#c0f63b; --on-accent:#000000; --steel:#a893f7; --steel-soft:#262040;
+  --line:#2b2b30; --line-strong:#3b3b42; --accent:#c0f63b; --on-accent:#000000; --accent-ink:#c0f63b; --steel:#a893f7; --steel-soft:#262040;
   --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --ok-soft:#10291a; --warn-soft:#2c210b; --bad-soft:#301414;
   --scrim:rgba(0,0,0,.66); --shadow:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.55);
   --side-bg:#050506; --side-ink:#f4f4f5; --side-muted:#a7a7b0; --side-hover:#18181b;
@@ -139,12 +139,13 @@ textarea.input{height:auto;min-height:84px;padding:12px 14px;resize:vertical}
 .pos-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .pos-top h1{font-size:28px;font-weight:700;margin-right:auto}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:12px}
-.tile{position:relative;display:flex;flex-direction:column;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:0;overflow:hidden;min-width:0;transition:border-color .12s,transform .12s}
+.tile{position:relative;display:flex;flex-direction:column;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--xs);overflow:hidden;min-width:0;transition:border-color .12s,transform .12s}
 .tile:hover{border-color:var(--ink)}
 .tile:active{transform:scale(.985)}
-.tile.in{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.tile.in{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.tile.in .tile-name{color:var(--accent-ink)}
 .tile.oos{opacity:.6}
-.tile-art{position:relative;height:92px;background:var(--raised);display:grid;place-items:center;color:var(--ink)}
+.tile-art{position:relative;height:128px;background:var(--raised);border-radius:var(--r-sm);overflow:hidden;display:grid;place-items:center;color:var(--ink)}
 .tile-art svg{width:44px;height:44px;opacity:.85}
 .tile-art .veh{position:absolute;top:8px;left:8px}
 .tile-art .veh-ic{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;color:var(--muted)}
@@ -174,7 +175,7 @@ textarea.input{height:auto;min-height:84px;padding:12px 14px;resize:vertical}
 .row-actions{display:flex;gap:var(--xs);justify-content:flex-end;flex-wrap:wrap}
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:520px){.pair{grid-template-columns:1fr}.brandf{flex:1 1 100%}}
-.tile-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
+.tile-body{padding:10px 4px 4px;display:flex;flex-direction:column;gap:2px;flex:1}
 .tile-name{font-weight:600;font-size:15.5px;line-height:1.3}
 .tile-fits{font-size:13.5px;color:var(--faint);line-height:1.35;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .tile-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:auto;padding-top:8px}
@@ -444,7 +445,7 @@ tr.lowrow td{background:color-mix(in srgb,var(--warn-soft) 55%,transparent)}
   .view-head h1{font-size:28px}
   .how{grid-template-columns:minmax(0,1fr)}
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .tile-art{height:76px}
+  .tile-art{height:112px}
   .tile-name{font-size:15px}
   .price{font-size:18px}
   .pos-top .seg{width:100%} .pos-top .seg button{flex:1}
