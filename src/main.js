@@ -207,9 +207,9 @@ const savedTheme=read("pd.theme");if(savedTheme)document.documentElement.dataset
 
 /* ---------- state ---------- */
 let net,session,me,inventory=[],bills=[];
-let cart=[],cartCust="walkin",discount={type:"pct",value:0},payMode="Cash";
+let cart=[],cartCust="walkin",discount={type:"pct",value:0},payMode="Cash",sumOpen=false;
 const f={q:"",veh:"all",cat:"All",brand:""},inv={q:"",low:false},find={q:"",pid:null};
-let dealTab="received",vq="",range="7",current="login";
+let dealTab="received",vq="",range="7",current="login",authRole="shop",authSlide=0;
 const acct=ref=>ref.t==="shop"?net.shops.find(s=>s.id===ref.id):net.vendors.find(v=>v.id===ref.id);
 const isMe=ref=>!!session&&ref.t===session.t&&ref.id===session.id;
 const shopsVisibleTo=s=>net.shops.filter(o=>o.id!==s.id&&km(s,o)>HIDE_KM);
@@ -325,9 +325,15 @@ function renderChrome(){
 function closeSide(){$("#side").classList.remove("open");$("#sideScrim").hidden=true}
 
 /* ---------- login ---------- */
+function setSlide(i){authSlide=i;document.querySelectorAll(".auth-slide").forEach((s,n)=>s.classList.toggle("on",n===i));setPressed(".auth-dots",String(i),"slide")}
+setInterval(()=>{if(current==="login"&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!$("#authHero").matches(":hover,:focus-within"))setSlide((authSlide+1)%document.querySelectorAll(".auth-slide").length)},6000);
 function renderLogin(){
-  $("#accShops").innerHTML=net.shops.map(s=>`<li class="acc"><div><b>${esc(s.name)}</b><span>${esc(s.owner)} · ${esc(s.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="shop:${s.id}">Sign in</button></li>`).join("");
-  $("#accVendors").innerHTML=net.vendors.map(v=>`<li class="acc"><div><b>${esc(v.name)}</b><span>${esc(v.kind)} · ${esc(v.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="vendor:${v.id}">Sign in</button></li>`).join("");
+  const shop=authRole==="shop";
+  $("#authHint").textContent=shop?"Choose a demo shop. Each shop sees its own name and logo.":"Choose a demo vendor. Vendors get their own app to keep stock current.";
+  $("#accTitle").textContent=shop?"Shops":"Vendors";
+  $("#accList").innerHTML=shop
+    ?net.shops.map(s=>`<li class="acc"><div><b>${esc(s.name)}</b><span>${esc(s.owner)} · ${esc(s.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="shop:${s.id}">Sign in</button></li>`).join("")
+    :net.vendors.map(v=>`<li class="acc"><div><b>${esc(v.name)}</b><span>${esc(v.kind)} · ${esc(v.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="vendor:${v.id}">Sign in</button></li>`).join("");
   paintThemeBtns();
 }
 
@@ -389,8 +395,8 @@ function addToCart(id,n=1){const p=inventory.find(x=>x.id===id);if(!p||p.stock<=
   if(line)setQty(id,line.qty+n);else{cart.push({id,qty:Math.min(n,p.stock)});renderCounter()}}
 const billNo=()=>me.prefix+"/"+fy(new Date())+"/"+String(bills.length+1).padStart(4,"0");
 const PAYMODES=[["Cash","Cash"],["UPI","UPI"],["Card","Card"],["Credit","Khata"]];
-function payTiles(c){const cu=getCust(cartCust),dis=!cart.length,lbl=PAYMODES.find(([m])=>m===payMode)[1];
-  return PAYMODES.map(([m,l])=>{const sel=m===payMode;return `<button class="pay-tile${sel?" sel":""}" data-paymode="${m}" aria-pressed="${sel}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="amt">${money0(c.total)}</span><span class="pl">${ic(sel?"check":m,sel?2.4:2)}${l}</span></button>`}).join("")+
+function payTiles(){const cu=getCust(cartCust),dis=!cart.length,lbl=PAYMODES.find(([m])=>m===payMode)[1];
+  return PAYMODES.map(([m,l])=>{const sel=m===payMode;return `<button class="pay-tile${sel?" sel":""}" data-paymode="${m}" aria-pressed="${sel}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="pl">${ic(sel?"check":m,sel?2.4:2)}${l}</span></button>`}).join("")+
     `<button class="pay-tile pick" id="genBill" ${dis?"disabled":""}><span class="pl">${ic("check",2.4)}Generate bill</span><small>Paying by ${lbl}</small></button>`}
 function renderCart(){
   const c=compute(cart,discount),cu=getCust(cartCust);
@@ -404,14 +410,15 @@ function renderCart(){
       <button class="icon-btn danger" data-remove="${i.id}" aria-label="Remove ${esc(i.name)}">${ic("x",2)}</button></div></li>`}).join("")
     :`<li class="empty" style="margin-top:12px;padding:var(--md) var(--sm)">Tap a part to add it to the bill.<br>Type a quantity for bulk orders.</li>`;
   $("#cartExtras").hidden=!cart.length;
-  $("#sum").innerHTML=`<div class="sum-row"><span>Sub total</span><span>${money(c.subtotal)}</span></div>
+  $("#sum").innerHTML=`<button class="sum-toggle" id="sumToggle" aria-expanded="${sumOpen}" aria-controls="sumRows"><span>Payment details</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="sum-rows" id="sumRows" ${sumOpen?"":"hidden"}><div class="sum-row"><span>Sub total</span><span>${money(c.subtotal)}</span></div>
     ${c.bulkSave>0?`<div class="sum-row save"><span>Bulk savings included</span><span>${money(c.bulkSave)}</span></div>`:""}
     <div class="sum-row"><span>Discount${c.disc>0&&discount.type==="pct"?" ("+discount.value+"%)":""}</span><span>${c.disc>0?"− ":""}${money(c.disc)}</span></div>
     <div class="sum-row muted"><span>GST ${GST}% (CGST + SGST)</span><span>${money(c.cgst+c.sgst)}</span></div>
-    <div class="sum-row muted"><span>Round off</span><span>${c.roundoff>=0?"+ ":"− "}${money(Math.abs(c.roundoff))}</span></div>
+    <div class="sum-row muted"><span>Round off</span><span>${c.roundoff>=0?"+ ":"− "}${money(Math.abs(c.roundoff))}</span></div></div>
     <div class="due-row"><span>Total due</span><strong>${money0(c.total)}</strong></div>`;
-  $("#paybar").innerHTML=payTiles(c);$("#payM").innerHTML=payTiles(c);
-  $("#paybar").hidden=!cart.length;$("#payM").hidden=!cart.length;document.querySelector(".cartbar").hidden=!cart.length;
+  $("#payGrid").innerHTML=payTiles();
+  $("#payGrid").hidden=!cart.length;document.querySelector(".cartbar").hidden=!cart.length;
   $("#barTotal").textContent=money0(c.total);$("#barItems").textContent=cart.length?`${cart.length} part${cart.length>1?"s":""} · ${c.units} units`:"No items yet";
 }
 function renderCounter(){renderCats();renderGrid();renderCart()}
@@ -731,7 +738,7 @@ function show(view){
   const allowed=!session?["login"]:session.t==="shop"?["counter","bills","customers","inventory","reports","find","wanted","deals"]:["vstock","deals"];
   if(!allowed.includes(view))view=allowed[0];
   current=view;VIEWS.forEach(v=>$("#view-"+v).hidden=v!==view);
-  $("#content").classList.toggle("pos",view==="counter");$("#resetWrap").hidden=!session||view==="counter";
+  $("#content").classList.toggle("pos",view==="counter"||view==="login");$("#resetWrap").hidden=!session||view==="counter";
   closeSide();rerender();$("#content").scrollTop=0;
   try{history.replaceState(null,"","#"+view)}catch(e){}
 }
@@ -750,6 +757,8 @@ document.addEventListener("click",e=>{
   if(ds.close!==undefined)return closeOverlay();
   if(ds.themeToggle!==undefined)return setTheme(effTheme()==="dark"?"light":"dark");
   if(ds.login){const [ty,id]=ds.login.split(":");return login(ty,id)}
+  if(ds.authrole){authRole=ds.authrole;setPressed("#authSeg",authRole,"authrole");return renderLogin()}
+  if(ds.slide)return setSlide(+ds.slide);
   if(ds.view){if(!$("#overlay").hidden)closeOverlay(true);return show(ds.view)}
   if(ds.part)return tapPart(ds.part);
   if(ds.pstep){const i=document.querySelector(`#pickForm [data-pq="${CSS.escape(ds.v)}"]`);i.value=Math.min(Math.max((Math.floor(Number(i.value))||0)+Number(ds.pstep),0),+i.max);return updatePick()}
@@ -762,7 +771,7 @@ document.addEventListener("click",e=>{
   if(ds.add10)return setQty(ds.add10,cart.find(x=>x.id===ds.add10).qty+10);
   if(ds.remove){cart=cart.filter(l=>l.id!==ds.remove);return renderCounter()}
   if(ds.dtype){discount.type=ds.dtype;setPressed("#discSeg",ds.dtype,"dtype");return renderCart()}
-  if(ds.paymode){payMode=ds.paymode;const box=t.parentElement.id;renderCart();return $(`#${box} [data-paymode="${payMode}"]`).focus()}
+  if(ds.paymode){payMode=ds.paymode;renderCart();return $(`#payGrid [data-paymode="${payMode}"]`).focus()}
   if(ds.recv){$("#pRecv").value=ds.recv;return updatePay()}
   if(ds.setcust){const then=$("#custList").dataset.then;cartCust=ds.setcust;closeOverlay(true);renderCart();if(then&&cartCust!=="walkin")return openPay(then);return}
   if(ds.newcust!==undefined)return openNewCust(ds.newcust);
@@ -783,6 +792,7 @@ document.addEventListener("click",e=>{
     case "menuBtn":$("#side").classList.add("open");$("#sideScrim").hidden=false;return;
     case "acctBtn":return logout();
     case "pickCust":return openCustPicker();
+    case "sumToggle":sumOpen=!sumOpen;renderCart();return $("#sumToggle").focus();
     case "genBill":{if(!cart.length)return toast("Add parts to the bill first.");return openPay(payMode)}
     case "clearCart":cart=[];payMode="Cash";cartCust="walkin";return renderCounter();
     case "openCart":return openSheet();

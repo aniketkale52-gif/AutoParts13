@@ -40,7 +40,7 @@ Loaded from Google Fonts in `index.html`.
 
 **Sizes are tuned for 40–60+ users:**
 - Body text is 16px. Nothing interactive is below 14px.
-- Page titles are 32px. The POS total is 34px. Sign-in hero 42–72px.
+- Page titles are 32px. The POS total is 34px. Sign-in hero 32–64px.
 - Labels are uppercase 12.5px with letter-spacing, used only for section labels.
 - Use `font-variant-numeric: tabular-nums` wherever numbers line up.
 
@@ -59,7 +59,7 @@ Loaded from Google Fonts in `index.html`.
 | Nav item | 48px |
 | Stepper +/− | 42px circle |
 | Category chip | 44px |
-| Payment tile | 78px |
+| Payment tile | 52px |
 | Part tile | ~190px |
 
 Every icon in the sidebar has a visible text label, even when the sidebar collapses to icons (≤1280px). Focus is a visible 3px outline.
@@ -68,7 +68,8 @@ Every icon in the sidebar has a visible text label, even when the sidebar collap
 
 - **Part tile:** category icon area with a vehicle badge (2W / 4W), name, fits line, a stock dot with count, and the price in Saira. A selected tile gets a 2px ink inset border and a lime quantity badge. An out-of-stock tile is dimmed and opens Find stock.
 - **Bill line:** name; struck-through list price when a bulk rate applies; part number; per-unit price; a purple bulk hint; stepper, +10, remove.
-- **Payment tile:** amount on top (Saira 21px), mode icon and uppercase label below. The selected tile gets a lime edge, soft tint and a tick. The Generate bill tile is solid lime and sits last on the right.
+- **Payment tile:** mode icon and uppercase label, in a 2×2 grid (Cash, UPI, Card, Khata) pinned to the bottom of the bill, under Total due. The selected tile gets a lime edge, soft tint and a tick. The Generate bill tile is solid lime and sits below them at full width.
+- **Sign-in screen:** dark brand panel on the left with a slider that changes every 6 seconds (it stops on hover, on keyboard focus and for reduced motion). A floating card on the right holds the Shop / Vendor toggle and the account list.
 - **Status pill:** `st-ok`, `st-low`, `st-out`, `st-wait`, `st-need` (ink, means "your turn"), `st-shared` (lime).
 - **Phone reveal:** ink-bordered box with a lime tint and a mono number, `user-select: all`.
 - **Tables:** 12.5px uppercase headers; 15.5px cells; low-stock rows tinted amber.

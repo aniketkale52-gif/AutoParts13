@@ -24,23 +24,38 @@
     <div class="content" id="content">
 
   <!-- LOGIN -->
-  <section id="view-login" hidden><div class="page">
-    <div class="login-top"><span class="brand"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><circle cx="12" cy="12" r="3.4"/></svg></i>PartsDesk</span><button class="theme-btn" data-theme-toggle></button></div>
-    <div class="login">
-      <div>
-        <span class="label">Point of sale for auto-parts shops</span>
-        <h1 style="margin-top:12px">Out of a part? <mark>Find who has it.</mark></h1>
-        <p class="lede">Bill at the counter, keep khata, and check live supplier stock. When both sides are interested, numbers are shared in the app and the deal is settled on a call.</p>
-        <div class="how">
-          <div><h3>Counter</h3><p>Big tap tiles, bulk rates, GST bills and every payment mode.</p></div>
-          <div><h3>Supplier stock</h3><p>Vendors keep stock current. Search a part and see who has it now.</p></div>
-          <div><h3>Shop trade</h3><p>Post what you need. Shops within 3 km of you never see it.</p></div>
+  <section id="view-login" hidden><div class="auth">
+    <div class="auth-hero" id="authHero">
+      <svg class="auth-deco" viewBox="-300 -300 600 600" fill="none" stroke="currentColor" aria-hidden="true"><defs><path id="authHex" d="M0-100 86.6-50v100L0 100l-86.6-50v-100z" vector-effect="non-scaling-stroke"/></defs><use href="#authHex"/><use href="#authHex" transform="scale(1.7)"/><use href="#authHex" transform="scale(2.4)"/><path d="M0-240V-100M207.8-120 86.6-50M207.8 120 86.6 50M0 240V100M-207.8 120-86.6 50M-207.8-120-86.6-50"/><circle r="40"/></svg>
+      <span class="brand"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><circle cx="12" cy="12" r="3.4"/></svg></i>PartsDesk</span>
+      <div class="auth-story">
+        <div class="auth-slides" role="group" aria-label="What PartsDesk does">
+          <div class="auth-slide on"><span class="label">Point of sale for auto-parts shops</span><h2>Out of a part? <mark>Find who has it.</mark></h2><p>Bill at the counter, keep khata, and check live supplier stock. When both sides are interested, numbers are shared in the app and the deal is settled on a call.</p></div>
+          <div class="auth-slide"><span class="label">Counter</span><h2>Bill faster <mark>at the counter.</mark></h2><p>Big tap tiles, bulk rates, GST bills and every payment mode.</p></div>
+          <div class="auth-slide"><span class="label">Supplier stock</span><h2>See who has it <mark>right now.</mark></h2><p>Vendors keep stock current. Search a part and see who has it now.</p></div>
+          <div class="auth-slide"><span class="label">Shop trade</span><h2>Trade with <mark>other shops.</mark></h2><p>Post what you need. Shops within 3 km of you never see it.</p></div>
+        </div>
+        <div class="auth-dots" role="group" aria-label="Choose a slide">
+          <button data-slide="0" aria-pressed="true" aria-label="Find who has it"><i></i></button>
+          <button data-slide="1" aria-pressed="false" aria-label="Counter"><i></i></button>
+          <button data-slide="2" aria-pressed="false" aria-label="Supplier stock"><i></i></button>
+          <button data-slide="3" aria-pressed="false" aria-label="Shop trade"><i></i></button>
         </div>
       </div>
+    </div>
+    <div class="auth-panel">
       <div class="accounts">
-        <div><h2>Sign in</h2><p class="muted small" style="margin:4px 0 0">Demo accounts. Each shop sees its own logo and name; vendors get their own app.</p></div>
-        <div><div class="label">Shops</div><ul class="acc-list" id="accShops"></ul></div>
-        <div><div class="label">Vendors</div><ul class="acc-list" id="accVendors"></ul></div>
+        <div class="accounts-in">
+          <div class="accounts-head"><div><h1>Sign in</h1><p class="muted" id="authHint"></p></div><button class="theme-btn" data-theme-toggle></button></div>
+          <div class="field">
+            <span class="label" id="authAsLabel">Sign in as</span>
+            <div class="seg auth-seg" role="group" aria-labelledby="authAsLabel" id="authSeg">
+              <button data-authrole="shop" aria-pressed="true">Shop</button>
+              <button data-authrole="vendor" aria-pressed="false">Vendor</button>
+            </div>
+          </div>
+          <div><div class="label" id="accTitle"></div><ul class="acc-list" id="accList"></ul></div>
+        </div>
       </div>
     </div>
   </div></section>
@@ -86,9 +101,8 @@
           </div>
         </div>
         <div class="sum" id="sum"></div>
-        <div class="paygrid-m" id="payM"></div>
+        <div class="paygrid" id="payGrid"></div>
       </aside>
-      <div class="paybar" id="paybar"></div>
     </div>
     <div class="cartbar"><div><b id="barTotal">₹0</b><span id="barItems">No items yet</span></div><button class="btn btn-primary" id="openCart">Review bill</button></div>
     <div class="sheet-scrim" id="sheetScrim" hidden></div>
