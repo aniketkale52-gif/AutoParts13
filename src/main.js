@@ -121,11 +121,11 @@ const CATALOG=[
  ["ck-apache","Motorcycle chain kit","TVS Apache RTR 160","CS-TA160-03","2W","Transmission","8714",1450,[[5,1360]],1120],
  ["ea-m800","Engine assembly, reconditioned","Maruti 800 MPFI","EA-M800-R","4W","Engine","8407",46500,[],41200]
 ].map(r=>({id:r[0],name:r[1],fits:r[2],pn:r[3],veh:r[4],cat:r[5],hsn:r[6],price:r[7],tiers:r[8].map(t=>({min:t[0],price:t[1]})),cost:r[9]}));
-// Catalogue part id -> photo in public/parts (Wikimedia Commons, see public/parts/CREDITS.txt). Parts not listed show their category icon.
+// Catalogue part id -> photo in public/parts (sources in public/parts/CREDITS.txt). Parts not listed show their category icon.
 const PHOTOS={"eo-5w30":"engine-oil","eo-10w30":"engine-oil","eo-15w40":"engine-oil","of-swift":"oil-filter","of-hy":"oil-filter","of-re":"oil-filter",
- "af-nexon":"cabin-filter","af-activa":"air-filter-2w","cf-creta":"cabin-filter","acf-swift":"cabin-filter","ff-mh":"fuel-filter","sp-2w":"spark-plug","sp-4w":"spark-plug",
- "bp-i20":"brake-pads","bp-swift":"brake-pads","mbp-pulsar":"brake-pads","mbp-activa":"brake-pads","bs-splendor":"brake-shoes","bs-alto":"brake-shoes","bd-swift":"brake-disc",
- "bdr-bolero":"brake-drum","bmc-wagonr":"master-cylinder","cp-alto":"clutch-plate","cp-pulsar":"clutch-plate","ck-swift":"clutch-kit","cc-splendor":"clutch-cable",
+ "af-nexon":"air-filter","af-activa":"air-filter-2w","cf-creta":"cabin-air-filter","acf-swift":"cabin-filter","ff-mh":"fuel-filter","sp-2w":"spark-plug","sp-4w":"spark-plug-iridium",
+ "bp-i20":"brake-pads","bp-swift":"brake-pads","mbp-pulsar":"brake-pads-2w","mbp-activa":"brake-pads-activa","bs-splendor":"brake-shoes","bs-alto":"brake-shoes-rear","bd-swift":"brake-disc",
+ "bdr-bolero":"brake-drum","bmc-wagonr":"master-cylinder","bf-dot4":"brake-fluid","cp-alto":"clutch-plate","cp-pulsar":"clutch-plate","ck-swift":"clutch-kit","cc-splendor":"clutch-cable",
  "tb-wagonr":"timing-belt","bt-35":"battery-car","bt-5":"battery-2w","alt-bolero":"alternator","hb-h4":"h4-bulb","ha-swift":"headlight","tl-creta":"tail-light",
  "ib-21w":"indicator-bulb","wb-24":"wiper-blade","wm-swift":"wiper-motor","cl-1l":"coolant","th-hy":"thermostat","sa-swift":"shock-absorber","sa-shine":"shock-2w",
  "fs-creta":"strut","tre-swift":"tie-rod-end","wbr-swift":"wheel-bearing","whub-xuv":"wheel-hub","ty-185":"tyre-car","ty-9090":"tyre-2w","fp-hy":"fuel-pump",

@@ -1,16 +1,16 @@
-Part photos from Wikimedia Commons, cropped and resized for PartsDesk.
+Part photos, cropped and resized for PartsDesk. Most are from Wikimedia Commons; each line says where it came from.
 
-engine-oil.jpg — "Motor oil.JPG" by originally Interiot; retouched by Where next Columbus?; brand name removed by H Padleckas, Public domain. Source: https://commons.wikimedia.org/wiki/File:Motor_oil.JPG
-oil-filter.jpg — "Spin-on-conversion.jpg" by Liftarn, CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/). Source: https://commons.wikimedia.org/wiki/File:Spin-on-conversion.jpg
-air-filter-2w.jpg — "Filtro aria a coppa.jpg" by A7N8X, CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0). Source: https://commons.wikimedia.org/wiki/File:Filtro_aria_a_coppa.jpg
+engine-oil.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+oil-filter.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+air-filter-2w.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
 cabin-filter.jpg — "Autobacs Pro Air conditioner filter H-0001.jpg" by Photographed by Qurren (talk), with IXY Digital 10 compact digital camera., CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0). Source: https://commons.wikimedia.org/wiki/File:Autobacs_Pro_Air_conditioner_filter_H-0001.jpg
-fuel-filter.jpg — "Manege Station exhibition. Diesel bus parts 01.jpg" by Retired electrician, CC0 (http://creativecommons.org/publicdomain/zero/1.0/deed.en). Source: https://commons.wikimedia.org/wiki/File:Manege_Station_exhibition._Diesel_bus_parts_01.jpg
-spark-plug.jpg — "Spark plug.jpg" by unknown, Public domain. Source: https://commons.wikimedia.org/wiki/File:Spark_plug.jpg
-brake-pads.jpg — "Worn metallic disc brake pads.jpg" by Troy Sankey, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0). Source: https://commons.wikimedia.org/wiki/File:Worn_metallic_disc_brake_pads.jpg
-brake-shoes.jpg — "Brake shoes.jpg" by Maly LOLek, CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/). Source: https://commons.wikimedia.org/wiki/File:Brake_shoes.jpg
-brake-disc.jpg — "Ventilated 2-Piece Floating Disc Curved Drilled & Slotted Brake Rotor.jpg" by Atharv Chandel, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0). Source: https://commons.wikimedia.org/wiki/File:Ventilated_2-Piece_Floating_Disc_Curved_Drilled_%26_Slotted_Brake_Rotor.jpg
-brake-drum.jpg — "Drum brake testrender.jpg" by Wapcaplet, CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/). Source: https://commons.wikimedia.org/wiki/File:Drum_brake_testrender.jpg
-master-cylinder.jpg — "Master clutch cylinder for Shacman and Howo 2013-11-23 19-51.jpg" by User:Otospareparts, CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0). Source: https://commons.wikimedia.org/wiki/File:Master_clutch_cylinder_for_Shacman_and_Howo_2013-11-23_19-51.jpg
+fuel-filter.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+spark-plug.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-pads.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-shoes.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-disc.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-drum.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+master-cylinder.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
 clutch-plate.jpg — "Close-up view of a worn clutch disc among automotive tools in a workshop.jpg" by Shixart1985, CC BY 2.0 (https://creativecommons.org/licenses/by/2.0). Source: https://commons.wikimedia.org/wiki/File:Close-up_view_of_a_worn_clutch_disc_among_automotive_tools_in_a_workshop.jpg
 clutch-kit.jpg — "Pull type clutch.jpg" by Panoha, CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/). Source: https://commons.wikimedia.org/wiki/File:Pull_type_clutch.jpg
 clutch-cable.jpg — "Ferrule on a bowden cable.jpg" by Jberkel, CC0 (http://creativecommons.org/publicdomain/zero/1.0/deed.en). Source: https://commons.wikimedia.org/wiki/File:Ferrule_on_a_bowden_cable.jpg
@@ -42,3 +42,10 @@ cv-joint.jpg — "CV Joint with broken tone ring.JPG" by Kiwiev, CC0 (http://cre
 cv-boot.jpg — "CV joint half axle.jpg" by BiH, Public domain. Source: https://commons.wikimedia.org/wiki/File:CV_joint_half_axle.jpg
 chain-kit.jpg — "Day 46 Cy365 Geared Up (61099044).jpeg" by Makia Minich, CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0). Source: https://commons.wikimedia.org/wiki/File:Day_46_Cy365_Geared_Up_(61099044).jpeg
 engine.jpg — "Car engine, Universal Studios Singapore - 20120925.jpg" by Erwin Soo from Singapore; uploaded by Russavia., CC BY 2.0 (https://creativecommons.org/licenses/by/2.0). Source: https://commons.wikimedia.org/wiki/File:Car_engine,_Universal_Studios_Singapore_-_20120925.jpg
+air-filter.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+cabin-air-filter.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+spark-plug-iridium.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-pads-2w.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-pads-activa.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-shoes-rear.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
+brake-fluid.jpg — Supplied by the project owner, not from Wikimedia Commons. Source and licence not recorded yet.
