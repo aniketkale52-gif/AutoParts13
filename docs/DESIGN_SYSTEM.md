@@ -70,6 +70,7 @@ Every icon in the sidebar has a visible text label, even when the sidebar collap
 - **Bill line:** name; struck-through list price when a bulk rate applies; part number; per-unit price; a purple bulk hint; stepper, +10, remove.
 - **Payment tile:** mode icon and uppercase label, in a 2×2 grid (Cash, UPI, Card, Khata) pinned to the bottom of the bill, under Total due. The selected tile gets a lime edge, soft tint and a tick. The Generate bill tile is solid lime and sits below them at full width.
 - **Sign-in screen:** dark brand panel on the left with a slider that changes every 6 seconds (it stops on hover, on keyboard focus and for reduced motion). A floating card on the right holds the Shop / Vendor toggle and the account list.
+- **Interest card:** square 72px part photo, part name, who and how many, then type and status pills and the time. A grey panel holds area, distance, price and one line of chips; a +N chip opens the other vehicles. Cards in a row match heights, with Decline and Share my number (or the shared number) on the bottom edge.
 - **Status pill:** `st-ok`, `st-low`, `st-out`, `st-wait`, `st-need` (ink, means "your turn"), `st-shared` (lime).
 - **Phone reveal:** ink-bordered box with a lime tint and a mono number, `user-select: all`.
 - **Tables:** 12.5px uppercase headers; 15.5px cells; low-stock rows tinted amber.
