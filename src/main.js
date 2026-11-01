@@ -45,6 +45,8 @@ const P={
  plus:'<path d="M12 5v14M5 12h14"/>',
  x:'<path d="M6 6l12 12M18 6 6 18"/>',
  check:'<path d="m5 12 5 5L20 7"/>',
+ pin:'<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+ rupee:'<circle cx="12" cy="12" r="9"/><path d="M8.5 8h7M8.5 11h7M10 8c3.6 0 3.6 6-1.5 6l5 3.5"/>',
  info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/>'
 };
 // Vehicle on a card: a small car and/or bike icon; the words are in title and the card label for screen readers.
@@ -207,9 +209,9 @@ const savedTheme=read("pd.theme");if(savedTheme)document.documentElement.dataset
 
 /* ---------- state ---------- */
 let net,session,me,inventory=[],bills=[];
-let cart=[],cartCust="walkin",discount={type:"pct",value:0},payMode="Cash";
+let cart=[],cartCust="walkin",discount={type:"pct",value:0},payMode="Cash",sumOpen=false;
 const f={q:"",veh:"all",cat:"All",brand:""},inv={q:"",low:false},find={q:"",pid:null};
-let dealTab="received",vq="",range="7",current="login";
+let dealTab="received",vq="",range="7",current="login",authRole="shop",authSlide=0;
 const acct=ref=>ref.t==="shop"?net.shops.find(s=>s.id===ref.id):net.vendors.find(v=>v.id===ref.id);
 const isMe=ref=>!!session&&ref.t===session.t&&ref.id===session.id;
 const shopsVisibleTo=s=>net.shops.filter(o=>o.id!==s.id&&km(s,o)>HIDE_KM);
@@ -325,9 +327,15 @@ function renderChrome(){
 function closeSide(){$("#side").classList.remove("open");$("#sideScrim").hidden=true}
 
 /* ---------- login ---------- */
+function setSlide(i){authSlide=i;document.querySelectorAll(".auth-slide").forEach((s,n)=>s.classList.toggle("on",n===i));setPressed(".auth-dots",String(i),"slide")}
+setInterval(()=>{if(current==="login"&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&!$("#authHero").matches(":hover,:focus-within"))setSlide((authSlide+1)%document.querySelectorAll(".auth-slide").length)},6000);
 function renderLogin(){
-  $("#accShops").innerHTML=net.shops.map(s=>`<li class="acc"><div><b>${esc(s.name)}</b><span>${esc(s.owner)} · ${esc(s.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="shop:${s.id}">Sign in</button></li>`).join("");
-  $("#accVendors").innerHTML=net.vendors.map(v=>`<li class="acc"><div><b>${esc(v.name)}</b><span>${esc(v.kind)} · ${esc(v.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="vendor:${v.id}">Sign in</button></li>`).join("");
+  const shop=authRole==="shop";
+  $("#authHint").textContent=shop?"Choose a demo shop. Each shop sees its own name and logo.":"Choose a demo vendor. Vendors get their own app to keep stock current.";
+  $("#accTitle").textContent=shop?"Shops":"Vendors";
+  $("#accList").innerHTML=shop
+    ?net.shops.map(s=>`<li class="acc"><div><b>${esc(s.name)}</b><span>${esc(s.owner)} · ${esc(s.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="shop:${s.id}">Sign in</button></li>`).join("")
+    :net.vendors.map(v=>`<li class="acc"><div><b>${esc(v.name)}</b><span>${esc(v.kind)} · ${esc(v.area)}</span></div><button class="btn btn-secondary btn-sm" data-login="vendor:${v.id}">Sign in</button></li>`).join("");
   paintThemeBtns();
 }
 
@@ -389,8 +397,8 @@ function addToCart(id,n=1){const p=inventory.find(x=>x.id===id);if(!p||p.stock<=
   if(line)setQty(id,line.qty+n);else{cart.push({id,qty:Math.min(n,p.stock)});renderCounter()}}
 const billNo=()=>me.prefix+"/"+fy(new Date())+"/"+String(bills.length+1).padStart(4,"0");
 const PAYMODES=[["Cash","Cash"],["UPI","UPI"],["Card","Card"],["Credit","Khata"]];
-function payTiles(c){const cu=getCust(cartCust),dis=!cart.length,lbl=PAYMODES.find(([m])=>m===payMode)[1];
-  return PAYMODES.map(([m,l])=>{const sel=m===payMode;return `<button class="pay-tile${sel?" sel":""}" data-paymode="${m}" aria-pressed="${sel}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="amt">${money0(c.total)}</span><span class="pl">${ic(sel?"check":m,sel?2.4:2)}${l}</span></button>`}).join("")+
+function payTiles(){const cu=getCust(cartCust),dis=!cart.length,lbl=PAYMODES.find(([m])=>m===payMode)[1];
+  return PAYMODES.map(([m,l])=>{const sel=m===payMode;return `<button class="pay-tile${sel?" sel":""}" data-paymode="${m}" aria-pressed="${sel}" ${dis?"disabled":""} ${m==="Credit"&&cu.id==="walkin"?'title="Choose a customer to put this on khata"':""}><span class="pl">${ic(sel?"check":m,sel?2.4:2)}${l}</span></button>`}).join("")+
     `<button class="pay-tile pick" id="genBill" ${dis?"disabled":""}><span class="pl">${ic("check",2.4)}Generate bill</span><small>Paying by ${lbl}</small></button>`}
 function renderCart(){
   const c=compute(cart,discount),cu=getCust(cartCust);
@@ -404,14 +412,15 @@ function renderCart(){
       <button class="icon-btn danger" data-remove="${i.id}" aria-label="Remove ${esc(i.name)}">${ic("x",2)}</button></div></li>`}).join("")
     :`<li class="empty" style="margin-top:12px;padding:var(--md) var(--sm)">Tap a part to add it to the bill.<br>Type a quantity for bulk orders.</li>`;
   $("#cartExtras").hidden=!cart.length;
-  $("#sum").innerHTML=`<div class="sum-row"><span>Sub total</span><span>${money(c.subtotal)}</span></div>
+  $("#sum").innerHTML=`<button class="sum-toggle" id="sumToggle" aria-expanded="${sumOpen}" aria-controls="sumRows"><span>Payment details</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <div class="sum-rows" id="sumRows" ${sumOpen?"":"hidden"}><div class="sum-row"><span>Sub total</span><span>${money(c.subtotal)}</span></div>
     ${c.bulkSave>0?`<div class="sum-row save"><span>Bulk savings included</span><span>${money(c.bulkSave)}</span></div>`:""}
     <div class="sum-row"><span>Discount${c.disc>0&&discount.type==="pct"?" ("+discount.value+"%)":""}</span><span>${c.disc>0?"− ":""}${money(c.disc)}</span></div>
     <div class="sum-row muted"><span>GST ${GST}% (CGST + SGST)</span><span>${money(c.cgst+c.sgst)}</span></div>
-    <div class="sum-row muted"><span>Round off</span><span>${c.roundoff>=0?"+ ":"− "}${money(Math.abs(c.roundoff))}</span></div>
+    <div class="sum-row muted"><span>Round off</span><span>${c.roundoff>=0?"+ ":"− "}${money(Math.abs(c.roundoff))}</span></div></div>
     <div class="due-row"><span>Total due</span><strong>${money0(c.total)}</strong></div>`;
-  $("#paybar").innerHTML=payTiles(c);$("#payM").innerHTML=payTiles(c);
-  $("#paybar").hidden=!cart.length;$("#payM").hidden=!cart.length;document.querySelector(".cartbar").hidden=!cart.length;
+  $("#payGrid").innerHTML=payTiles();
+  $("#payGrid").hidden=!cart.length;document.querySelector(".cartbar").hidden=!cart.length;
   $("#barTotal").textContent=money0(c.total);$("#barItems").textContent=cart.length?`${cart.length} part${cart.length>1?"s":""} · ${c.units} units`:"No items yet";
 }
 function renderCounter(){renderCats();renderGrid();renderCart()}
@@ -650,20 +659,26 @@ function renderFind(){
 }
 
 /* interests */
+const dealMore=new Set();
 function dealCard(i){
-  const out=isMe(i.from),other=acct(out?i.to:i.from),nm=pname(i.pid,i.brand),who=out?i.to:i.from;
+  const out=isMe(i.from),other=acct(out?i.to:i.from),nm=pname(i.pid,i.brand),who=out?i.to:i.from,p=cat(i.pid);
   const typeTag=who.t==="vendor"?'<span class="tag tag-net">Supplier</span>':'<span class="tag">Shop</span>';
-  const title=out?(i.kind==="offer"?`You offered ${i.qty} × ${nm}`:`You asked for ${i.qty} × ${nm}`):(i.kind==="offer"?`${other.name} can supply ${i.qty} × ${nm}`:`${other.name} wants ${i.qty} × ${nm}`);
+  const sub=out?(i.kind==="offer"?`You offered ${i.qty} to ${other.name}`:`You asked ${other.name} for ${i.qty}`):(i.kind==="offer"?`${other.name} can supply ${i.qty}`:`${other.name} wants ${i.qty}`);
   const st=i.status==="shared"?['st-shared','Numbers shared']:i.status==="declined"?['st-off',out?'Declined':'You declined']:out?['st-wait','Waiting for reply']:['st-need','Needs your reply'];
   const price=i.price?`${out?"Your":"Their"} price ${money0(i.price)} / unit`:"No price given";
   let body="";
   if(i.status==="shared")body=`<div class="phone"><div><span class="label">${out?esc(other.name)+" shared their number":"Their number"}</span><strong>${esc(other.phone)}</strong></div><button class="btn btn-secondary btn-sm" data-copy="${esc(other.phone)}">Copy number</button></div>
     <p class="faint small" style="margin:0">${out?"Call them to agree price, quantity and delivery.":"You shared your number. Expect their call, or call them first."} Payment happens outside the app.</p>`;
-  else if(i.status==="pending"&&!out)body=`<div class="deal-actions"><button class="btn btn-primary btn-sm" data-share="${i.id}">Share my number</button><button class="btn-link" data-decline="${i.id}">Decline</button></div><p class="faint small" style="margin:0">Sharing lets ${esc(other.name)} call you on ${esc(me.phone)}.</p>`;
+  else if(i.status==="pending"&&!out)body=`<div class="deal-cta"><button class="btn btn-secondary" data-decline="${i.id}">Decline</button><button class="btn btn-primary" data-share="${i.id}">Share my number</button></div><p class="faint small" style="margin:0">Sharing lets ${esc(other.name)} call you on ${esc(me.phone)}.</p>`;
   else if(i.status==="pending")body=`<p class="faint small" style="margin:0">${esc(other.name)} sees your name, area and this request. Their number appears here when they accept.</p>`;
-  return `<article class="deal${i.status==="pending"&&!out?" need":""}"><div class="deal-top"><span class="status ${st[0]}">${st[1]}</span><span class="faint small">${ago(i.at)}</span></div>
-    <h3 class="deal-title">${esc(title)}</h3><div class="deal-meta">${typeTag} ${out?"To "+esc(other.name)+" · ":""}${esc(other.area)} · ${kmTxt(me,other)} · ${price}${i.wid?" · re: Wanted post":""}</div>
-    ${i.note?`<div class="deal-note">${esc(i.note)}</div>`:""}${body}</article>`;
+  const fits=(p.fits||"").split(",").map(x=>x.trim()).filter(Boolean),more=fits.length-1,open=dealMore.has(i.id);
+  const chips=[p.cat,...(open?fits:fits.slice(0,1))].map(x=>`<span class="deal-chip" title="${esc(x)}">${esc(x)}</span>`).join("");
+  const moreBtn=more>0?`<button class="deal-more" data-dealmore="${i.id}" aria-expanded="${open}" aria-label="${open?"Show fewer vehicles":`Show ${more} more vehicle${more>1?"s":""}`}" title="${esc(fits.slice(1).join(", "))}"><span class="deal-chip">${open?"Less":"+"+more}</span></button>`:"";
+  return `<article class="deal deal-card${i.status==="pending"&&!out?" need":""}"><div class="deal-head"><span class="thumb">${art(p)}</span><div class="deal-who"><h3 class="deal-title">${esc(nm)}</h3><span class="deal-meta">${esc(sub)}</span></div></div>
+    <div class="deal-tags">${typeTag}<span class="status ${st[0]}">${st[1]}</span>${i.wid?'<span class="tag">Wanted post</span>':""}<span class="faint small deal-ago">${ago(i.at)}</span></div>
+    <div class="deal-panel"><div class="deal-row">${ic("pin")}<span>${esc(other.area)} · ${kmTxt(me,other)}</span></div><div class="deal-row">${ic("rupee")}<span>${price}</span></div>
+      <div class="deal-chips${open?" open":""}">${chips}${moreBtn}</div></div>
+    ${i.note?`<div class="deal-note">${esc(i.note)}</div>`:""}<div class="deal-foot">${body}</div></article>`;
 }
 function renderDeals(){
   const rec=net.interests.filter(i=>isMe(i.to)),sent=net.interests.filter(i=>isMe(i.from)),isV=session.t==="vendor";if(isV)dealTab="received";
@@ -731,7 +746,7 @@ function show(view){
   const allowed=!session?["login"]:session.t==="shop"?["counter","bills","customers","inventory","reports","find","wanted","deals"]:["vstock","deals"];
   if(!allowed.includes(view))view=allowed[0];
   current=view;VIEWS.forEach(v=>$("#view-"+v).hidden=v!==view);
-  $("#content").classList.toggle("pos",view==="counter");$("#resetWrap").hidden=!session||view==="counter";
+  $("#content").classList.toggle("pos",view==="counter"||view==="login");$("#resetWrap").hidden=!session||view==="counter";
   closeSide();rerender();$("#content").scrollTop=0;
   try{history.replaceState(null,"","#"+view)}catch(e){}
 }
@@ -750,6 +765,8 @@ document.addEventListener("click",e=>{
   if(ds.close!==undefined)return closeOverlay();
   if(ds.themeToggle!==undefined)return setTheme(effTheme()==="dark"?"light":"dark");
   if(ds.login){const [ty,id]=ds.login.split(":");return login(ty,id)}
+  if(ds.authrole){authRole=ds.authrole;setPressed("#authSeg",authRole,"authrole");return renderLogin()}
+  if(ds.slide)return setSlide(+ds.slide);
   if(ds.view){if(!$("#overlay").hidden)closeOverlay(true);return show(ds.view)}
   if(ds.part)return tapPart(ds.part);
   if(ds.pstep){const i=document.querySelector(`#pickForm [data-pq="${CSS.escape(ds.v)}"]`);i.value=Math.min(Math.max((Math.floor(Number(i.value))||0)+Number(ds.pstep),0),+i.max);return updatePick()}
@@ -762,7 +779,7 @@ document.addEventListener("click",e=>{
   if(ds.add10)return setQty(ds.add10,cart.find(x=>x.id===ds.add10).qty+10);
   if(ds.remove){cart=cart.filter(l=>l.id!==ds.remove);return renderCounter()}
   if(ds.dtype){discount.type=ds.dtype;setPressed("#discSeg",ds.dtype,"dtype");return renderCart()}
-  if(ds.paymode){payMode=ds.paymode;const box=t.parentElement.id;renderCart();return $(`#${box} [data-paymode="${payMode}"]`).focus()}
+  if(ds.paymode){payMode=ds.paymode;renderCart();return $(`#payGrid [data-paymode="${payMode}"]`).focus()}
   if(ds.recv){$("#pRecv").value=ds.recv;return updatePay()}
   if(ds.setcust){const then=$("#custList").dataset.then;cartCust=ds.setcust;closeOverlay(true);renderCart();if(then&&cartCust!=="walkin")return openPay(then);return}
   if(ds.newcust!==undefined)return openNewCust(ds.newcust);
@@ -777,12 +794,14 @@ document.addEventListener("click",e=>{
   if(ds.share){const i=net.interests.find(x=>x.id===ds.share);i.status="shared";save();rerender();return toast(`Number shared with ${acct(i.from).name}`)}
   if(ds.decline){const i=net.interests.find(x=>x.id===ds.decline);i.status="declined";save();rerender();return toast("Declined. They'll see it was declined.")}
   if(ds.copy)return copy(ds.copy,"Number copied",()=>toast("Copy blocked here. The number is "+ds.copy));
+  if(ds.dealmore){const id=ds.dealmore;dealMore.has(id)?dealMore.delete(id):dealMore.add(id);renderDeals();return $(`[data-dealmore="${id}"]`).focus()}
   if(ds.dealtab){dealTab=ds.dealtab;return renderDeals()}
   if(ds.closepost){const w=net.wanted.find(x=>x.id===ds.closepost);w.open=!w.open;save();renderWanted();return toast(w.open?"Request reopened":"Request closed")}
   switch(t.id){
     case "menuBtn":$("#side").classList.add("open");$("#sideScrim").hidden=false;return;
     case "acctBtn":return logout();
     case "pickCust":return openCustPicker();
+    case "sumToggle":sumOpen=!sumOpen;renderCart();return $("#sumToggle").focus();
     case "genBill":{if(!cart.length)return toast("Add parts to the bill first.");return openPay(payMode)}
     case "clearCart":cart=[];payMode="Cash";cartCust="walkin";return renderCounter();
     case "openCart":return openSheet();
