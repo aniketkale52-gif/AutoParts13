@@ -90,8 +90,9 @@ A part a shop adds itself has `pid` like `x1730000000000`.
 
 ## Wanted post
 ```json
-{ "id": "w1", "shopId": "s4", "pid": "ea-m800", "brand": "", "qty": 1,   // brand "" = any brand "offer": 44000, "note": "…", "open": true, "at": "ISO date" }
+{ "id": "w1", "shopId": "s4", "pid": "ea-m800", "brand": "", "qty": 1,   // brand "" = any brand "offer": 44000, "note": "…", "open": true, "at": "ISO date", "declinedBy": ["s1"] }
 ```
+`declinedBy` lists shops that declined the post. It only hides the post from those shops; the poster never sees it.
 
 ## Visibility rule (server-side in production)
 ```

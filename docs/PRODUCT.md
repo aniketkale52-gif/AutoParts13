@@ -60,7 +60,7 @@ Many users are 40–60+. **Large type, large touch targets and plain words are r
 
 ### 3. Shop-to-shop trade (Wanted)
 1. Nobody has the part → **Post to Wanted** (part, quantity, price offered, note).
-2. Shops more than 3 km away see the post. If they have stock, they tap **I have this** and make an offer.
+2. Shops more than 3 km away see the post. If they have stock, they tap **I have this** and make an offer. **Decline** hides the post from that shop without telling the poster, and **Undo decline** brings it back.
 3. The poster accepts by sharing their number. Same call-to-close flow.
 
 ## Business rules

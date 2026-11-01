@@ -87,4 +87,4 @@ vercel.json           Vercel build + SPA routing
 
 ## Demo data
 
-Demo data loads on first visit and is saved in the browser. To start fresh, use **Reset demo data** at the bottom of any back-office screen, or clear the site's storage. The storage keys are `pd5.net` (everything), `pd5.me` (signed-in account) and `pd.theme`.
+Demo data loads on first visit and is saved in the browser. To start fresh, clear the site's storage. The storage keys are `pd5.net` (everything), `pd5.me` (signed-in account) and `pd.theme`.

@@ -660,6 +660,13 @@ function renderFind(){
 
 /* interests */
 const dealMore=new Set();
+// Category and first vehicle on one line; a +N chip opens the other vehicles. Used by Interest and Wanted cards.
+function dealChips(id,p){
+  const fits=(p.fits||"").split(",").map(x=>x.trim()).filter(Boolean),more=fits.length-1,open=dealMore.has(id);
+  const chips=[p.cat,...(open?fits:fits.slice(0,1))].map(x=>`<span class="deal-chip" title="${esc(x)}">${esc(x)}</span>`).join("");
+  const moreBtn=more>0?`<button class="deal-more" data-dealmore="${id}" aria-expanded="${open}" aria-label="${open?"Show fewer vehicles":`Show ${more} more vehicle${more>1?"s":""}`}" title="${esc(fits.slice(1).join(", "))}"><span class="deal-chip">${open?"Less":"+"+more}</span></button>`:"";
+  return `<div class="deal-chips${open?" open":""}">${chips}${moreBtn}</div>`;
+}
 function dealCard(i){
   const out=isMe(i.from),other=acct(out?i.to:i.from),nm=pname(i.pid,i.brand),who=out?i.to:i.from,p=cat(i.pid);
   const typeTag=who.t==="vendor"?'<span class="tag tag-net">Supplier</span>':'<span class="tag">Shop</span>';
@@ -671,13 +678,10 @@ function dealCard(i){
     <p class="faint small" style="margin:0">${out?"Call them to agree price, quantity and delivery.":"You shared your number. Expect their call, or call them first."} Payment happens outside the app.</p>`;
   else if(i.status==="pending"&&!out)body=`<div class="deal-cta"><button class="btn btn-secondary" data-decline="${i.id}">Decline</button><button class="btn btn-primary" data-share="${i.id}">Share my number</button></div><p class="faint small" style="margin:0">Sharing lets ${esc(other.name)} call you on ${esc(me.phone)}.</p>`;
   else if(i.status==="pending")body=`<p class="faint small" style="margin:0">${esc(other.name)} sees your name, area and this request. Their number appears here when they accept.</p>`;
-  const fits=(p.fits||"").split(",").map(x=>x.trim()).filter(Boolean),more=fits.length-1,open=dealMore.has(i.id);
-  const chips=[p.cat,...(open?fits:fits.slice(0,1))].map(x=>`<span class="deal-chip" title="${esc(x)}">${esc(x)}</span>`).join("");
-  const moreBtn=more>0?`<button class="deal-more" data-dealmore="${i.id}" aria-expanded="${open}" aria-label="${open?"Show fewer vehicles":`Show ${more} more vehicle${more>1?"s":""}`}" title="${esc(fits.slice(1).join(", "))}"><span class="deal-chip">${open?"Less":"+"+more}</span></button>`:"";
   return `<article class="deal deal-card${i.status==="pending"&&!out?" need":""}"><div class="deal-head"><span class="thumb">${art(p)}</span><div class="deal-who"><h3 class="deal-title">${esc(nm)}</h3><span class="deal-meta">${esc(sub)}</span></div></div>
     <div class="deal-tags">${typeTag}<span class="status ${st[0]}">${st[1]}</span>${i.wid?'<span class="tag">Wanted post</span>':""}<span class="faint small deal-ago">${ago(i.at)}</span></div>
     <div class="deal-panel"><div class="deal-row">${ic("pin")}<span>${esc(other.area)} · ${kmTxt(me,other)}</span></div><div class="deal-row">${ic("rupee")}<span>${price}</span></div>
-      <div class="deal-chips${open?" open":""}">${chips}${moreBtn}</div></div>
+      ${dealChips(i.id,p)}</div>
     ${i.note?`<div class="deal-note">${esc(i.note)}</div>`:""}<div class="deal-foot">${body}</div></article>`;
 }
 function renderDeals(){
@@ -690,20 +694,40 @@ function renderDeals(){
 }
 
 /* wanted */
+let showDeclined=false;
+const declinedPost=w=>(w.declinedBy||[]).includes(me.id);
 function renderWanted(){
   fillBrandSel($("#wBrand"),{any:"Any brand"});const keep=$("#wPart").value;$("#wPart").innerHTML=CATALOG.map(p=>`<option value="${p.id}">${esc(p.name)} · ${esc(p.fits)}</option>`).join("");if(keep)$("#wPart").value=keep;
   $("#wReach").textContent=`Shown to ${shopsVisibleTo(me).length} shops more than ${HIDE_KM} km away.`;
   const vis=net.wanted.filter(w=>w.open&&w.shopId!==me.id&&canSee(me,net.shops.find(s=>s.id===w.shopId))).sort((a,b)=>new Date(b.at)-new Date(a.at));
-  $("#wantedList").innerHTML=vis.length?vis.map(w=>{const s=net.shops.find(x=>x.id===w.shopId),p=cat(w.pid),mine=myStock(w.pid,w.brand),sent=net.interests.find(i=>isMe(i.from)&&i.wid===w.id);
-    const cta=sent?(sent.status==="shared"?`<button class="status st-shared" data-view="deals" style="border:0">Numbers shared · view</button>`:`<span class="status st-wait">Offer sent ${ago(sent.at)}</span>`):mine>0?`<button class="btn btn-primary btn-sm" data-have="${w.id}">I have this</button><span class="faint small">You have ${mine}</span>`:`<span class="faint small">${w.brand?"No "+esc(w.brand)+" in your stock":"Not in your stock"}</span>`;
-    return `<article class="deal"><div class="deal-top"><span class="tag">Shop</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(pname(w.pid,w.brand))}</h3>
-      <div class="deal-meta">${esc(p.fits)} · ${w.brand?`only ${esc(w.brand)}`:"any brand"}</div><div class="deal-meta">${esc(s.name)} · ${esc(s.area)} · ${kmTxt(me,s)}${w.offer?` · offering <b style="color:var(--ink)">${money0(w.offer)}</b> / unit`:""}</div>
-      ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-actions">${cta}</div></article>`}).join(""):`<div class="empty" style="grid-column:1/-1">No open requests from shops in other areas right now.</div>`;
+  const active=vis.filter(w=>!declinedPost(w)),off=vis.filter(declinedPost);if(!off.length)showDeclined=false;
+  $("#wantedList").innerHTML=active.length?active.map(wantedCard).join(""):`<div class="empty" style="grid-column:1/-1">No open requests from shops in other areas right now.</div>`;
+  $("#wantedDeclined").innerHTML=off.length?`<button class="btn-link" data-showdeclined aria-expanded="${showDeclined}">${showDeclined?"Hide declined requests":`Show ${off.length} declined request${off.length>1?"s":""}`}</button>${showDeclined?`<div class="deals" style="margin-top:var(--xs)">${off.map(wantedCard).join("")}</div>`:""}`:"";
   const mineW=net.wanted.filter(w=>w.shopId===me.id).sort((a,b)=>b.open-a.open||new Date(b.at)-new Date(a.at));
-  $("#wantedMine").innerHTML=mineW.length?mineW.map(w=>{const resp=net.interests.filter(i=>i.wid===w.id);
-    return `<article class="deal"><div class="deal-top"><span class="status ${w.open?"st-wait":"st-off"}">${w.open?"Open":"Closed"}</span><span class="faint small">${ago(w.at)}</span></div><h3 class="deal-title">${w.qty} × ${esc(pname(w.pid,w.brand))}</h3>
-      <div class="deal-meta">${w.offer?`Your price ${money0(w.offer)} / unit · `:""}${resp.length?`<button class="btn-link" data-view="deals">${resp.length} offer${resp.length>1?"s":""} received</button>`:"No offers yet"}</div>
-      ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-actions"><button class="btn-link" data-closepost="${w.id}">${w.open?"Close request":"Reopen"}</button></div></article>`}).join(""):`<div class="empty" style="grid-column:1/-1">You haven't posted anything yet.</div>`;
+  $("#wantedMine").innerHTML=mineW.length?mineW.map(wantedMineCard).join(""):`<div class="empty" style="grid-column:1/-1">You haven't posted anything yet.</div>`;
+}
+const brandTag=w=>`<span class="tag">${w.brand?"Only "+esc(w.brand):"Any brand"}</span>`;
+// Another shop's post.
+function wantedCard(w){
+  const s=net.shops.find(x=>x.id===w.shopId),p=cat(w.pid),mine=myStock(w.pid,w.brand),sent=net.interests.find(i=>isMe(i.from)&&i.wid===w.id);
+  const off=declinedPost(w),declineBtn=`<button class="btn btn-secondary" data-declinepost="${w.id}">Decline</button>`;
+  const st=off?["st-off","You declined"]:sent?(sent.status==="shared"?["st-shared","Numbers shared"]:sent.status==="declined"?["st-off","Offer declined"]:["st-wait",`Offer sent ${ago(sent.at)}`]):mine>0?["st-ok",`You have ${mine}`]:["st-off",w.brand?`No ${esc(w.brand)} in your stock`:"Not in your stock"];
+  const foot=off?`<div class="deal-cta"><button class="btn btn-secondary" data-undodecline="${w.id}">Undo decline</button></div>`:sent?(sent.status==="shared"?`<div class="deal-cta"><button class="btn btn-primary" data-view="deals" data-dealtab="sent">See their number</button></div>`:sent.status==="declined"?`<p class="faint small" style="margin:0">${esc(s.name)} declined your offer.</p>`:`<p class="faint small" style="margin:0">Their number appears under Interests when they accept.</p>`):mine>0?`<div class="deal-cta">${declineBtn}<button class="btn btn-primary" data-have="${w.id}">I have this</button></div>`:`<div class="deal-cta">${declineBtn}</div><p class="faint small" style="margin:0">You can offer this once it's in your inventory.</p>`;
+  return `<article class="deal deal-card"><div class="deal-head"><span class="thumb">${art(p)}</span><div class="deal-who"><h3 class="deal-title">${esc(pname(w.pid,w.brand))}</h3><span class="deal-meta">${esc(s.name)} wants ${w.qty}</span></div></div>
+    <div class="deal-tags"><span class="tag">Shop</span>${brandTag(w)}<span class="status ${st[0]}">${st[1]}</span><span class="faint small deal-ago">${ago(w.at)}</span></div>
+    <div class="deal-panel"><div class="deal-row">${ic("pin")}<span>${esc(s.area)} · ${kmTxt(me,s)}</span></div><div class="deal-row">${ic("rupee")}<span>${w.offer?`Their price ${money0(w.offer)} / unit`:"No price given"}</span></div>
+      ${dealChips(w.id,p)}</div>
+    ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-foot">${foot}</div></article>`;
+}
+// Your own post, with the offers it has received.
+function wantedMineCard(w){
+  const p=cat(w.pid),n=net.interests.filter(i=>i.wid===w.id).length;
+  const seeOffers=n?`<button class="btn btn-primary" data-view="deals" data-dealtab="received">See ${n} offer${n>1?"s":""}</button>`:"";
+  return `<article class="deal deal-card"><div class="deal-head"><span class="thumb">${art(p)}</span><div class="deal-who"><h3 class="deal-title">${esc(pname(w.pid,w.brand))}</h3><span class="deal-meta">You asked for ${w.qty}</span></div></div>
+    <div class="deal-tags"><span class="status ${w.open?"st-wait":"st-off"}">${w.open?"Open":"Closed"}</span>${brandTag(w)}<span class="faint small deal-ago">${ago(w.at)}</span></div>
+    <div class="deal-panel"><div class="deal-row">${ic("wanted")}<span>${n?`${n} offer${n>1?"s":""} received`:"No offers yet"}</span></div><div class="deal-row">${ic("rupee")}<span>${w.offer?`Your price ${money0(w.offer)} / unit`:"No price given"}</span></div>
+      ${dealChips(w.id,p)}</div>
+    ${w.note?`<div class="deal-note">${esc(w.note)}</div>`:""}<div class="deal-foot"><div class="deal-cta"><button class="btn btn-secondary" data-closepost="${w.id}">${w.open?"Close request":"Reopen request"}</button>${seeOffers}</div></div></article>`;
 }
 
 /* vendor stock */
@@ -746,7 +770,7 @@ function show(view){
   const allowed=!session?["login"]:session.t==="shop"?["counter","bills","customers","inventory","reports","find","wanted","deals"]:["vstock","deals"];
   if(!allowed.includes(view))view=allowed[0];
   current=view;VIEWS.forEach(v=>$("#view-"+v).hidden=v!==view);
-  $("#content").classList.toggle("pos",view==="counter"||view==="login");$("#resetWrap").hidden=!session||view==="counter";
+  $("#content").classList.toggle("pos",view==="counter"||view==="login");
   closeSide();rerender();$("#content").scrollTop=0;
   try{history.replaceState(null,"","#"+view)}catch(e){}
 }
@@ -767,7 +791,7 @@ document.addEventListener("click",e=>{
   if(ds.login){const [ty,id]=ds.login.split(":");return login(ty,id)}
   if(ds.authrole){authRole=ds.authrole;setPressed("#authSeg",authRole,"authrole");return renderLogin()}
   if(ds.slide)return setSlide(+ds.slide);
-  if(ds.view){if(!$("#overlay").hidden)closeOverlay(true);return show(ds.view)}
+  if(ds.view){if(ds.dealtab)dealTab=ds.dealtab;if(!$("#overlay").hidden)closeOverlay(true);return show(ds.view)}
   if(ds.part)return tapPart(ds.part);
   if(ds.pstep){const i=document.querySelector(`#pickForm [data-pq="${CSS.escape(ds.v)}"]`);i.value=Math.min(Math.max((Math.floor(Number(i.value))||0)+Number(ds.pstep),0),+i.max);return updatePick()}
   if(ds.addbrand)return openAddBrand(ds.addbrand);
@@ -793,8 +817,11 @@ document.addEventListener("click",e=>{
   if(ds.want){show("wanted");$("#wantForm").hidden=false;$("#wPart").value=ds.want;$("#wBrand").value=ds.brand||"";const mine=variantsOf(inventory,ds.want);$("#wQty").value=mine.length?Math.max(mine.reduce((a,v)=>a+v.reorder*2-v.stock,0),1):1;return $("#wQty").focus()}
   if(ds.share){const i=net.interests.find(x=>x.id===ds.share);i.status="shared";save();rerender();return toast(`Number shared with ${acct(i.from).name}`)}
   if(ds.decline){const i=net.interests.find(x=>x.id===ds.decline);i.status="declined";save();rerender();return toast("Declined. They'll see it was declined.")}
+  if(ds.declinepost){const w=net.wanted.find(x=>x.id===ds.declinepost);w.declinedBy=[...(w.declinedBy||[]),me.id];save();renderWanted();return toast("Request declined. The shop isn't told.")}
+  if(ds.undodecline){const w=net.wanted.find(x=>x.id===ds.undodecline);w.declinedBy=w.declinedBy.filter(id=>id!==me.id);save();renderWanted();return toast("Request is back in your list")}
+  if("showdeclined" in ds){showDeclined=!showDeclined;renderWanted();return $("[data-showdeclined]").focus()}
   if(ds.copy)return copy(ds.copy,"Number copied",()=>toast("Copy blocked here. The number is "+ds.copy));
-  if(ds.dealmore){const id=ds.dealmore;dealMore.has(id)?dealMore.delete(id):dealMore.add(id);renderDeals();return $(`[data-dealmore="${id}"]`).focus()}
+  if(ds.dealmore){const id=ds.dealmore;dealMore.has(id)?dealMore.delete(id):dealMore.add(id);rerender();return $(`[data-dealmore="${id}"]`).focus()}
   if(ds.dealtab){dealTab=ds.dealtab;return renderDeals()}
   if(ds.closepost){const w=net.wanted.find(x=>x.id===ds.closepost);w.open=!w.open;save();renderWanted();return toast(w.open?"Request reopened":"Request closed")}
   switch(t.id){
@@ -816,9 +843,6 @@ document.addEventListener("click",e=>{
     case "cancelVAdd":$("#vAddForm").reset();$("#vAddForm").hidden=true;$("#vErr").textContent="";return;
     case "clearFind":find.pid=null;return renderFind();
     case "lowOnly":inv.low=!inv.low;t.setAttribute("aria-pressed",String(inv.low));return renderInventory();
-    case "resetAsk":$("#resetConfirm").hidden=false;t.hidden=true;return;
-    case "resetNo":$("#resetConfirm").hidden=true;$("#resetAsk").hidden=false;return;
-    case "resetYes":{const s=session;net=seedNet();save();$("#resetConfirm").hidden=true;$("#resetAsk").hidden=false;session=s;setMe();if(!me)return logout();rerender();return toast("Demo data restored")}
   }
 });
 $("#sideScrim").addEventListener("click",closeSide);
